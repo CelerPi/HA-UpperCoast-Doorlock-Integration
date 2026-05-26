@@ -19,7 +19,7 @@ OPTION_CONTROLLED_KEYS = (
 
 
 class ConfigStore:
-    def __init__(self, path: str | Path = "/data/yunhai_config.json") -> None:
+    def __init__(self, path: str | Path = "/data/uppercoast_config.json") -> None:
         self.path = Path(path)
 
     def load(self, defaults: IntercomConfig) -> IntercomConfig:

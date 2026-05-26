@@ -5,10 +5,10 @@ import unittest
 from pathlib import Path
 
 
-APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
+APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "uppercoast_doorlock" / "app"
 sys.path.insert(0, str(APP_DIR))
 
-from yunhai_intercom.config import load_addon_options
+from uppercoast_doorlock.config import load_addon_options
 
 
 class AddonConfigTest(unittest.TestCase):
@@ -63,6 +63,23 @@ class AddonConfigTest(unittest.TestCase):
         self.assertEqual("1层", config.devices[0].floor_label)
         self.assertEqual("192.168.23.160", config.devices[4].target_ip)
         self.assertEqual("-2层", config.devices[5].floor_label)
+
+    def test_chinese_building_option_loads_matching_building_rules(self):
+        config = load_addon_options(
+            _write_temp_options(
+                {
+                    "building_id": "2栋C座",
+                    "local_ip": "192.168.23.64",
+                    "local_id": "00010123010",
+                }
+            )
+        )
+
+        devices = {device.door_no: device for device in config.devices}
+        self.assertEqual("building_2_c", config.building_id)
+        self.assertEqual("2栋C座", config.building_name)
+        self.assertEqual("192.168.23.155", devices["01"].target_ip)
+        self.assertEqual("192.168.23.169", devices["08"].target_ip)
 
     def test_unknown_building_falls_back_to_default_preset(self):
         with tempfile.TemporaryDirectory() as temp_dir:

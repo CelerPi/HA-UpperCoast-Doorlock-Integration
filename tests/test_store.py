@@ -5,11 +5,11 @@ import unittest
 from pathlib import Path
 
 
-APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
+APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "uppercoast_doorlock" / "app"
 sys.path.insert(0, str(APP_DIR))
 
-from yunhai_intercom.config import normalize_options
-from yunhai_intercom.store import ConfigStore
+from uppercoast_doorlock.config import normalize_options
+from uppercoast_doorlock.store import ConfigStore
 
 
 class ConfigStoreTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class ConfigStoreTest(unittest.TestCase):
         defaults = normalize_options({"local_ip": "192.168.16.88", "building_id": "building_1_a"})
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            store_path = Path(temp_dir) / "yunhai_config.json"
+            store_path = Path(temp_dir) / "uppercoast_config.json"
             config = ConfigStore(store_path).load(defaults)
             saved = json.loads(store_path.read_text(encoding="utf-8"))
 
@@ -37,7 +37,7 @@ class ConfigStoreTest(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            store_path = Path(temp_dir) / "yunhai_config.json"
+            store_path = Path(temp_dir) / "uppercoast_config.json"
             store_path.write_text(
                 json.dumps(
                     {
@@ -64,7 +64,7 @@ class ConfigStoreTest(unittest.TestCase):
         defaults = normalize_options({"building_id": "building_2_c"})
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            store_path = Path(temp_dir) / "yunhai_config.json"
+            store_path = Path(temp_dir) / "uppercoast_config.json"
             store_path.write_text(
                 json.dumps(
                     {

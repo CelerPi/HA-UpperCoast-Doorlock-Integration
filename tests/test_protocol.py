@@ -4,11 +4,11 @@ import unittest
 from pathlib import Path
 
 
-APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
+APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "uppercoast_doorlock" / "app"
 sys.path.insert(0, str(APP_DIR))
 
-from yunhai_intercom.config import load_addon_options
-from yunhai_intercom.protocol import (
+from uppercoast_doorlock.config import load_addon_options
+from uppercoast_doorlock.protocol import (
     MonitorFrameAssembler,
     build_b700_payload,
     build_call_audio_payload,
@@ -28,7 +28,7 @@ from yunhai_intercom.protocol import (
 
 class ProtocolPayloadTest(unittest.TestCase):
     def setUp(self):
-        self.config = load_addon_options("/tmp/yunhai-missing-options.json")
+        self.config = load_addon_options("/tmp/uppercoast-missing-options.json")
         self.device_2f = self.config.devices[1]
 
     def test_unlock_payload_matches_known_2f_packet(self):

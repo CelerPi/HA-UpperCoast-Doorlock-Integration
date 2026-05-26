@@ -38,6 +38,7 @@ BUILDING_NAMES = [
 ]
 
 BUILDING_NAME_BY_ID = dict(BUILDING_NAMES)
+BUILDING_ID_BY_NAME = {name: building_id for building_id, name in BUILDING_NAMES}
 
 STATION_LAYOUT_BY_DOOR = {
     "01": {"name": "1F-1", "floor_label": "1层", "position_detail": "未知"},
@@ -205,7 +206,8 @@ def load_addon_options(options_path: str | Path = "/data/options.json") -> Inter
 def normalize_options(raw_options: Any) -> IntercomConfig:
     options = raw_options if isinstance(raw_options, dict) else {}
 
-    building_id = str(options.get("building_id") or DEFAULT_BUILDING_ID)
+    building_value = str(options.get("building_id") or DEFAULT_BUILDING_ID).strip()
+    building_id = BUILDING_ID_BY_NAME.get(building_value, building_value)
     if building_id not in BUILDING_NAME_BY_ID:
         building_id = DEFAULT_BUILDING_ID
 

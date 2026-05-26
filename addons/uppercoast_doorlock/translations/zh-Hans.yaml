@@ -7,7 +7,7 @@ configuration:
     description: 虚拟室内机 ID，例如 1栋A座1601 当前使用 00010116010。
   building_id:
     name: 楼栋
-    description: 选择当前房屋所在楼栋，门口机会按楼栋预设自动生成。
+    description: 选择当前房屋所在楼栋，保存并重启后会加载对应门口机 IP 配置。
   center_ip:
     name: 中心地址
     description: 小区中心机 IP 地址。

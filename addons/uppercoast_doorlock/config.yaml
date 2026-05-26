@@ -1,7 +1,7 @@
 name: "门禁系统后端"
-version: "0.1.4"
-slug: "yunhai_intercom"
-description: "运行虚拟室内机、呼叫监听、接听和解锁服务。"
+version: "0.1.0"
+slug: "uppercoast_doorlock"
+description: "仅支持麦驰可视对讲门禁系统；运行虚拟室内机、呼叫监听、接听和解锁服务。"
 url: "https://github.com/CelerPi/HA-UpperCoast-DoorLock-System"
 arch:
   - aarch64
@@ -14,7 +14,7 @@ homeassistant_api: true
 options:
   local_ip: "192.168.16.64"
   local_id: "00010116010"
-  building_id: "building_1_a"
+  building_id: "1栋A座"
   center_ip: "192.168.16.2"
   property_center_ip: "192.168.16.3"
   api_host: "0.0.0.0"
@@ -31,7 +31,7 @@ options:
 schema:
   local_ip: str
   local_id: str
-  building_id: list(building_1_a|building_1_b|building_1_c|building_1_d|building_1_e|building_2_a|building_2_b|building_2_c)
+  building_id: list(1栋A座|1栋B座|1栋C座|1栋D座|1栋E座|2栋A座|2栋B座|2栋C座)
   center_ip: str
   property_center_ip: str
   api_host: str

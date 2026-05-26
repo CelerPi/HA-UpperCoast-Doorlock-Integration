@@ -3,16 +3,16 @@ import unittest
 from pathlib import Path
 
 
-APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
+APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "uppercoast_doorlock" / "app"
 sys.path.insert(0, str(APP_DIR))
 
-from yunhai_intercom.call_state import CallStateTracker, devices_by_ip, parse_penguin_command
-from yunhai_intercom.config import load_addon_options, normalize_options
+from uppercoast_doorlock.call_state import CallStateTracker, devices_by_ip, parse_penguin_command
+from uppercoast_doorlock.config import load_addon_options, normalize_options
 
 
 class CallStateTest(unittest.TestCase):
     def test_devices_by_ip_uses_only_active_configured_stations(self):
-        default_config = load_addon_options("/tmp/yunhai-missing-options.json")
+        default_config = load_addon_options("/tmp/uppercoast-missing-options.json")
         blank_config = normalize_options({"building_id": "building_2_c"})
 
         active = devices_by_ip(default_config)
@@ -30,7 +30,7 @@ class CallStateTest(unittest.TestCase):
         self.assertEqual("-", parse_penguin_command(b"not-penguin"))
 
     def test_call_trigger_from_known_station_begins_current_call(self):
-        config = load_addon_options("/tmp/yunhai-missing-options.json")
+        config = load_addon_options("/tmp/uppercoast-missing-options.json")
         tracker = CallStateTracker(config)
         payload = bytes.fromhex("50454e4755494e30b700010000002000")
 
@@ -46,7 +46,7 @@ class CallStateTest(unittest.TestCase):
         self.assertEqual("-1层", snapshot["floor_label"])
 
     def test_call_end_only_closes_the_current_station_call(self):
-        config = load_addon_options("/tmp/yunhai-missing-options.json")
+        config = load_addon_options("/tmp/uppercoast-missing-options.json")
         tracker = CallStateTracker(config)
         trigger = bytes.fromhex("50454e4755494e30cd00010000002000")
         end = bytes.fromhex("50454e4755494e30b400060000002200000000000000000000000000000000000100")
@@ -65,7 +65,7 @@ class CallStateTest(unittest.TestCase):
         self.assertEqual("", snapshot["target_ip"])
 
     def test_packets_from_unknown_ip_are_ignored(self):
-        config = load_addon_options("/tmp/yunhai-missing-options.json")
+        config = load_addon_options("/tmp/uppercoast-missing-options.json")
         tracker = CallStateTracker(config)
         payload = bytes.fromhex("50454e4755494e30cd00010000002000")
 

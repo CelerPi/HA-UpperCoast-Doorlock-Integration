@@ -1,4 +1,4 @@
-"""Yunhai intercom add-on backend."""
+"""UpperCoast doorlock add-on backend."""
 
 from .config import DoorStation, IntercomConfig, load_addon_options
 from .core import FrameHub, IntercomCore

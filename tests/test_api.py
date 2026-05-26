@@ -5,11 +5,11 @@ import unittest
 from pathlib import Path
 
 
-APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
+APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "uppercoast_doorlock" / "app"
 sys.path.insert(0, str(APP_DIR))
 
-from yunhai_intercom.api import make_api_handler
-from yunhai_intercom.config import normalize_options
+from uppercoast_doorlock.api import make_api_handler
+from uppercoast_doorlock.config import normalize_options
 
 
 class FakeFrameHub:

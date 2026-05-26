@@ -9,8 +9,8 @@ from .config import IntercomConfig
 
 
 def make_api_handler(core: Any, config: IntercomConfig) -> type[BaseHTTPRequestHandler]:
-    class YunhaiApiHandler(BaseHTTPRequestHandler):
-        server_version = "YunhaiIntercomAPI/0.1"
+    class UpperCoastDoorlockApiHandler(BaseHTTPRequestHandler):
+        server_version = "UpperCoastDoorlockAPI/0.1"
 
         def do_GET(self) -> None:
             if self.path == "/health":
@@ -80,7 +80,7 @@ def make_api_handler(core: Any, config: IntercomConfig) -> type[BaseHTTPRequestH
             self.end_headers()
             self.wfile.write(payload)
 
-    return YunhaiApiHandler
+    return UpperCoastDoorlockApiHandler
 
 
 class ApiServer:
@@ -95,7 +95,7 @@ class ApiServer:
             return
         handler = make_api_handler(self.core, self.config)
         self._server = ThreadingHTTPServer((self.config.api_host, self.config.api_port), handler)
-        self._thread = threading.Thread(target=self._server.serve_forever, name="YunhaiIntercomAPI", daemon=True)
+        self._thread = threading.Thread(target=self._server.serve_forever, name="UpperCoastDoorlockAPI", daemon=True)
         self._thread.start()
 
     def stop(self) -> None:
