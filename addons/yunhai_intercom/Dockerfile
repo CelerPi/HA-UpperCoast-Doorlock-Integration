@@ -1,4 +1,4 @@
-FROM ghcr.io/home-assistant/base:latest
+FROM python:3.12-alpine
 
 ARG BUILD_VERSION
 ARG BUILD_ARCH
@@ -8,13 +8,12 @@ LABEL \
   io.hass.type="app" \
   io.hass.arch="${BUILD_ARCH}"
 
-RUN apk add --no-cache python3
-
 COPY run.sh /
 COPY app /app
 
 RUN chmod a+x /run.sh
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app \
+  PYTHONUNBUFFERED=1
 
 CMD [ "/run.sh" ]

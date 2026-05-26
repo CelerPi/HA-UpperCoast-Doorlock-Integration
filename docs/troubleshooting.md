@@ -1,5 +1,22 @@
 # 排障
 
+## 安装时 Docker build 失败
+
+如果日志中出现类似：
+
+```text
+failed to fetch anonymous token
+lookup ghcr.io on 127.0.0.11:53: server misbehaving
+```
+
+说明 HA 里的 Docker 构建环境没有正常解析镜像仓库域名。这不是 GitHub 仓库 private/public 的问题；代码仓库已经拉到了，失败点是在下载 Docker 基础镜像。
+
+当前 Add-on 已改用 Docker Hub 的 `python:3.12-alpine` 基础镜像，避开 `ghcr.io/home-assistant/base`。如果刷新仓库后仍失败，并且日志变成 `registry-1.docker.io`、`auth.docker.io` 或其他域名解析失败，就需要修 HA 主机或 Supervisor 的 DNS：
+
+1. 在 HA 的系统网络设置里检查 DNS。
+2. 可以临时改成路由器 DNS，或 `223.5.5.5`、`119.29.29.29`、`1.1.1.1` 这类稳定 DNS。
+3. 重启 Supervisor 或重启 HA 主机后重新安装 Add-on。
+
 ## 日志显示 IP 绑定失败
 
 如果日志中出现类似：

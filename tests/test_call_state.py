@@ -21,7 +21,7 @@ class CallStateTest(unittest.TestCase):
         self.assertEqual("1F-1", active["192.168.16.224"].name)
         self.assertEqual("B1-3", active["192.168.16.226"].name)
         self.assertEqual("1F-8", active["192.168.23.165"].name)
-        self.assertEqual({}, devices_by_ip(blank_config))
+        self.assertEqual(7, len(devices_by_ip(blank_config)))
 
     def test_penguin_command_parser_extracts_command_or_dash(self):
         payload = bytes.fromhex("50454e4755494e30cd00010000002000")

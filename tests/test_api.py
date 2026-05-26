@@ -1,11 +1,8 @@
+import io
 import json
 import sys
-import threading
 import unittest
-from http.server import ThreadingHTTPServer
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 
 
 APP_DIR = Path(__file__).resolve().parents[1] / "addons" / "yunhai_intercom" / "app"
@@ -53,70 +50,73 @@ class ApiTest(unittest.TestCase):
             }
         )
         self.core = FakeCore()
-        handler = make_api_handler(self.core, self.config)
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
-        self.thread.start()
-        self.base_url = f"http://127.0.0.1:{self.server.server_address[1]}"
-
-    def tearDown(self):
-        self.server.shutdown()
-        self.server.server_close()
-        self.thread.join(timeout=2)
+        self.handler_cls = make_api_handler(self.core, self.config)
 
     def test_health_endpoint_returns_ok(self):
-        response = self._json("GET", "/health")
+        response = self._invoke("GET", "/health")
 
-        self.assertEqual({"ok": True}, response)
+        self.assertEqual(200, response["status"])
+        self.assertEqual({"ok": True}, response["json"])
 
     def test_status_endpoint_returns_runtime_and_config_summary(self):
-        response = self._json("GET", "/api/status")
+        response = self._invoke("GET", "/api/status")
 
-        self.assertEqual("持续监听 192.168.16.64:10000，等待室外机呼叫", response["runtime"]["status"])
-        self.assertTrue(response["runtime"]["in_call"])
-        self.assertEqual("192.168.16.225", response["runtime"]["target_ip"])
-        self.assertEqual("building_1_a", response["config"]["building_id"])
-        self.assertEqual(8, response["config"]["active_device_count"])
+        self.assertEqual("持续监听 192.168.16.64:10000，等待室外机呼叫", response["json"]["runtime"]["status"])
+        self.assertTrue(response["json"]["runtime"]["in_call"])
+        self.assertEqual("192.168.16.225", response["json"]["runtime"]["target_ip"])
+        self.assertEqual("building_1_a", response["json"]["config"]["building_id"])
+        self.assertEqual(8, response["json"]["config"]["active_device_count"])
 
     def test_unlock_requires_bearer_token(self):
-        with self.assertRaises(HTTPError) as error:
-            self._json("POST", "/api/unlock", {"target_ip": "192.168.16.225"})
+        response = self._invoke("POST", "/api/unlock", {"target_ip": "192.168.16.225"})
 
-        self.assertEqual(403, error.exception.code)
-        error.exception.close()
+        self.assertEqual(403, response["status"])
+        self.assertEqual({"ok": False, "error": "forbidden"}, response["json"])
         self.assertEqual([], self.core.unlock_targets)
 
     def test_unlock_and_answer_actions_use_current_target_by_default(self):
-        unlock = self._json("POST", "/api/unlock", headers={"Authorization": "Bearer secret-token"})
-        answer = self._json("POST", "/api/answer", headers={"Authorization": "Bearer secret-token"})
+        unlock = self._invoke("POST", "/api/unlock", headers={"Authorization": "Bearer secret-token"})
+        answer = self._invoke("POST", "/api/answer", headers={"Authorization": "Bearer secret-token"})
 
-        self.assertTrue(unlock["ok"])
-        self.assertTrue(answer["ok"])
+        self.assertEqual(200, unlock["status"])
+        self.assertTrue(unlock["json"]["ok"])
+        self.assertTrue(answer["json"]["ok"])
         self.assertEqual(["192.168.16.225"], self.core.unlock_targets)
         self.assertEqual(["192.168.16.225"], self.core.answer_targets)
 
     def test_action_returns_conflict_when_core_rejects_request(self):
-        with self.assertRaises(HTTPError) as error:
-            self._json(
-                "POST",
-                "/api/unlock",
-                {"target_ip": "192.168.16.226"},
-                {"Authorization": "Bearer secret-token"},
-            )
-
-        self.assertEqual(409, error.exception.code)
-        error.exception.close()
-
-    def _json(self, method, path, body=None, headers=None):
-        data = None if body is None else json.dumps(body).encode("utf-8")
-        request = Request(
-            self.base_url + path,
-            data=data,
-            method=method,
-            headers={"Content-Type": "application/json", **(headers or {})},
+        response = self._invoke(
+            "POST",
+            "/api/unlock",
+            {"target_ip": "192.168.16.226"},
+            {"Authorization": "Bearer secret-token"},
         )
-        with urlopen(request, timeout=2) as response:
-            return json.loads(response.read().decode("utf-8"))
+
+        self.assertEqual(409, response["status"])
+        self.assertEqual({"ok": False, "error": "request_rejected", "action": "unlock"}, response["json"])
+
+    def _invoke(self, method, path, body=None, headers=None):
+        handler = self.handler_cls.__new__(self.handler_cls)
+        handler.path = path
+        payload = b"" if body is None else json.dumps(body).encode("utf-8")
+        handler.headers = {
+            "Content-Type": "application/json",
+            "Content-Length": str(len(payload)),
+            **(headers or {}),
+        }
+        handler.rfile = io.BytesIO(payload)
+        handler.wfile = io.BytesIO()
+        handler.responses = []
+        handler.send_response = lambda status: handler.responses.append(status)
+        handler.send_header = lambda *_args, **_kwargs: None
+        handler.end_headers = lambda: None
+
+        getattr(handler, f"do_{method}")()
+        payload = handler.wfile.getvalue().decode("utf-8")
+        return {
+            "status": handler.responses[0],
+            "json": json.loads(payload),
+        }
 
 
 if __name__ == "__main__":

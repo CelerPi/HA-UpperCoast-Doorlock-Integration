@@ -6,6 +6,7 @@
 
 - [安装 Add-on](#安装-add-on)
 - [基础配置](configuration.md)
+- [楼栋 IP 规则](building-ips.md)
 - [网络连接方式](network.md)
 - [Add-on API](api.md)
 - [HA 首次测试清单](ha-first-test.md)
@@ -53,7 +54,7 @@ local_ip: "192.168.16.64"
 local_id: "00010116010"
 building_id: "building_1_a"
 center_ip: "192.168.16.2"
-property_center_ip: "192.168.23.255"
+property_center_ip: "192.168.16.3"
 api_host: "0.0.0.0"
 api_port: 8099
 api_token: ""

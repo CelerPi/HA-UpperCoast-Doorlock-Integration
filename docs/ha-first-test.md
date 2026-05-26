@@ -18,7 +18,7 @@ local_ip: "192.168.16.64"
 local_id: "00010116010"
 building_id: "building_1_a"
 center_ip: "192.168.16.2"
-property_center_ip: "192.168.23.255"
+property_center_ip: "192.168.16.3"
 api_host: "0.0.0.0"
 api_port: 8099
 api_token: "自己设置一个长一点的随机字符串"

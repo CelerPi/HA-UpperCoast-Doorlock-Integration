@@ -80,7 +80,7 @@ class ConfigStoreTest(unittest.TestCase):
             config = ConfigStore(store_path).load(defaults)
 
         self.assertEqual("building_2_c", config.building_id)
-        self.assertEqual([], config.active_devices)
+        self.assertEqual(7, len(config.active_devices))
 
 
 if __name__ == "__main__":

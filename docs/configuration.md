@@ -6,9 +6,9 @@
 | --- | --- | --- |
 | `local_ip` | `192.168.16.64` | HA 主机在门禁网络中的 IP。必须真实存在于 HA 网卡上。 |
 | `local_id` | `00010116010` | 虚拟室内机 ID。当前 1601 使用此值。 |
-| `building_id` | `building_1_a` | 楼栋预设。当前只有 1 栋 A 座门口机 IP 已知。 |
+| `building_id` | `building_1_a` | 楼栋预设。会按楼栋规则表生成门口机 IP。 |
 | `center_ip` | `192.168.16.2` | 小区中心地址。 |
-| `property_center_ip` | `192.168.23.255` | 物业中心机地址。 |
+| `property_center_ip` | `192.168.16.3` | 物业中心机地址。 |
 | `api_host` | `0.0.0.0` | Add-on HTTP API 监听地址。 |
 | `api_port` | `8099` | Add-on HTTP API 监听端口。 |
 | `api_token` | 空 | 动作接口 Bearer token。为空时解锁/接听接口不可用。 |
@@ -28,7 +28,7 @@ building_2_b -> 2栋B座
 building_2_c -> 2栋C座
 ```
 
-只有 `building_1_a` 已内置门口机 IP，其余楼栋会生成 8 个空 IP 占位。空 IP 不会参与监听。
+当前各楼栋都已按你提供的规则表生成，未记录的号机不会出现在配置里，也不会参与监听。
 
 ## 1 栋 A 座门口机
 
@@ -56,4 +56,5 @@ Add-on 会写入：
 当前同步规则：
 
 - `local_ip`、`local_id`、`building_id`、`center_ip`、`property_center_ip`、API 配置以 Add-on options 为准。
-- `devices` 中已经手动覆盖过的门口机 IP 会保留。
+- `devices` 从楼栋规则表生成。
+- `devices` 中已经手动覆盖过的单个门口机 IP 会保留。
