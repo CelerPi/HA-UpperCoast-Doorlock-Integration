@@ -37,7 +37,7 @@ Lovelace 卡片和 HA Custom Integration 还未完成，因此当前阶段主要
    https://github.com/CelerPi/HA-UpperCoast-DoorLock-System.git
    ```
 
-4. 刷新 Add-on Store，打开 **Yunhai Intercom**。
+4. 刷新 Add-on Store，打开 **UpperCoast Doorlock System**。
 5. 点击 **Install**。
 6. 进入 **Configuration** 页，按 [基础配置](configuration.md) 填写参数。
 7. 打开 **Start on boot** 和 **Watchdog**。

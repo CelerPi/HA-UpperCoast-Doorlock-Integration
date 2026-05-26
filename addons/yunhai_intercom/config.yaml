@@ -1,5 +1,5 @@
-name: "Yunhai Intercom"
-version: "0.1.0"
+name: "UpperCoast Doorlock System"
+version: "0.1.1"
 slug: "yunhai_intercom"
 description: "Virtual indoor station backend for Upper Coast door intercom."
 url: "https://github.com/CelerPi/HA-UpperCoast-DoorLock-System"

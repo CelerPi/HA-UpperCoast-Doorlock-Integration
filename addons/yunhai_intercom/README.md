@@ -1,6 +1,6 @@
-# Yunhai Intercom Add-on
+# UpperCoast Doorlock System
 
-This add-on runs the long-lived backend for the Yunhai virtual indoor station.
+This add-on runs the long-lived backend for the UpperCoast virtual indoor station.
 The current skeleton loads Home Assistant add-on options and keeps the process
 alive so protocol listeners can be migrated in small, testable slices.
 
