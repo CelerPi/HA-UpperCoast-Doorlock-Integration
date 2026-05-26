@@ -15,6 +15,17 @@ DEFAULT_API_HOST = "0.0.0.0"
 DEFAULT_API_PORT = 8099
 DEFAULT_API_TOKEN = ""
 
+DOOR_IP_OPTION_BY_DOOR = {
+    "01": "door_01_ip",
+    "02": "door_02_ip",
+    "03": "door_03_ip",
+    "04": "door_04_ip",
+    "05": "door_05_ip",
+    "06": "door_06_ip",
+    "07": "door_07_ip",
+    "08": "door_08_ip",
+}
+
 BUILDING_NAMES = [
     ("building_1_a", "1栋A座"),
     ("building_1_b", "1栋B座"),
@@ -198,7 +209,7 @@ def normalize_options(raw_options: Any) -> IntercomConfig:
     if building_id not in BUILDING_NAME_BY_ID:
         building_id = DEFAULT_BUILDING_ID
 
-    devices = tuple(_build_devices(building_id, options.get("devices")))
+    devices = tuple(_build_devices(building_id, options.get("devices"), options))
 
     return IntercomConfig(
         local_ip=str(options.get("local_ip") or DEFAULT_LOCAL_IP),
@@ -214,17 +225,24 @@ def normalize_options(raw_options: Any) -> IntercomConfig:
     )
 
 
-def _build_devices(building_id: str, saved_devices: Any = None) -> list[DoorStation]:
+def _build_devices(
+    building_id: str,
+    saved_devices: Any = None,
+    raw_options: dict[str, Any] | None = None,
+) -> list[DoorStation]:
     known_ips = BUILDING_IPS_BY_ID.get(building_id, {})
     position_overrides = BUILDING_POSITION_OVERRIDES.get(building_id, {})
     saved_by_door = _saved_devices_by_door(saved_devices)
+    option_ip_overrides = _door_ip_overrides(raw_options)
     devices = []
 
     for door_no, default_target_ip in known_ips.items():
         station = STATION_LAYOUT_BY_DOOR[door_no]
         saved = saved_by_door.get(door_no, {})
         saved_target_ip = saved.get("target_ip")
-        target_ip = saved_target_ip if saved_target_ip is not None else default_target_ip
+        target_ip = option_ip_overrides.get(door_no)
+        if target_ip is None:
+            target_ip = saved_target_ip if saved_target_ip is not None else default_target_ip
         default_position_detail = position_overrides.get(door_no, station["position_detail"])
         devices.append(
             DoorStation(
@@ -237,6 +255,18 @@ def _build_devices(building_id: str, saved_devices: Any = None) -> list[DoorStat
         )
 
     return devices
+
+
+def _door_ip_overrides(raw_options: dict[str, Any] | None) -> dict[str, str]:
+    if not raw_options:
+        return {}
+
+    overrides = {}
+    for door_no, option_key in DOOR_IP_OPTION_BY_DOOR.items():
+        value = str(raw_options.get(option_key) or "").strip()
+        if value:
+            overrides[door_no] = value
+    return overrides
 
 
 def _saved_devices_by_door(saved_devices: Any) -> dict[str, dict[str, Any]]:

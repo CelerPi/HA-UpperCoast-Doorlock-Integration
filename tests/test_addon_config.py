@@ -164,6 +164,35 @@ class AddonConfigTest(unittest.TestCase):
         self.assertEqual("192.168.23.169", devices["08"].target_ip)
         self.assertEqual(7, len(config.devices))
 
+    def test_door_ip_options_override_building_defaults(self):
+        config = load_addon_options(
+            _write_temp_options(
+                {
+                    "building_id": "building_1_a",
+                    "door_02_ip": "192.168.16.250",
+                    "door_03_ip": "",
+                }
+            )
+        )
+
+        devices = {device.door_no: device for device in config.devices}
+        self.assertEqual("192.168.16.250", devices["02"].target_ip)
+        self.assertEqual("192.168.16.226", devices["03"].target_ip)
+
+    def test_door_ip_options_do_not_create_missing_building_devices(self):
+        config = load_addon_options(
+            _write_temp_options(
+                {
+                    "building_id": "building_2_b",
+                    "door_08_ip": "192.168.22.188",
+                }
+            )
+        )
+
+        devices = {device.door_no: device for device in config.devices}
+        self.assertNotIn("08", devices)
+        self.assertEqual(4, len(config.devices))
+
     def test_all_building_ip_rules_match_collected_export(self):
         expected_by_building = {
             "building_1_a": {

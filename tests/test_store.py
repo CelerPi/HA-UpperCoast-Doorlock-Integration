@@ -26,12 +26,13 @@ class ConfigStoreTest(unittest.TestCase):
         self.assertEqual(8, len(config.active_devices))
         self.assertEqual("192.168.16.225", saved["devices"][1]["target_ip"])
 
-    def test_store_preserves_device_ip_overrides_while_options_control_identity(self):
+    def test_store_syncs_device_ips_from_addon_options(self):
         defaults = normalize_options(
             {
                 "local_ip": "192.168.16.99",
                 "local_id": "00010199010",
                 "building_id": "building_1_a",
+                "door_02_ip": "192.168.16.251",
             }
         )
 
@@ -57,7 +58,7 @@ class ConfigStoreTest(unittest.TestCase):
         devices_by_door = {device.door_no: device for device in config.devices}
         self.assertEqual("192.168.16.99", config.local_ip)
         self.assertEqual("00010199010", config.local_id)
-        self.assertEqual("192.168.16.250", devices_by_door["02"].target_ip)
+        self.assertEqual("192.168.16.251", devices_by_door["02"].target_ip)
 
     def test_switching_building_discards_previous_building_device_overrides(self):
         defaults = normalize_options({"building_id": "building_2_c"})

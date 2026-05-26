@@ -30,12 +30,9 @@ class ConfigStore:
 
         merged = dict(raw) if isinstance(raw, dict) else {}
         default_data = defaults.as_dict(include_secret=True)
-        if merged.get("building_id") != default_data["building_id"]:
-            merged.pop("devices", None)
         for key in OPTION_CONTROLLED_KEYS:
             merged[key] = default_data[key]
-        if "devices" not in merged:
-            merged["devices"] = default_data["devices"]
+        merged["devices"] = default_data["devices"]
 
         config = normalize_options(merged)
         self.save(config)

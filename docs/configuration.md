@@ -12,6 +12,7 @@
 | `api_host` | `0.0.0.0` | Add-on HTTP API 监听地址。 |
 | `api_port` | `8099` | Add-on HTTP API 监听端口。 |
 | `api_token` | 空 | 动作接口 Bearer token。为空时解锁/接听接口不可用。 |
+| `door_01_ip` - `door_08_ip` | 空 | 可选门口机 IP 覆盖。留空时使用当前楼栋预设；填写后覆盖对应号机。 |
 
 ## 楼栋 ID
 
@@ -29,6 +30,18 @@ building_2_c -> 2栋C座
 ```
 
 当前各楼栋都已按你提供的规则表生成，未记录的号机不会出现在配置里，也不会参与监听。
+
+## 门口机 IP 覆盖
+
+Add-on Configuration 页面里有 `door_01_ip` 到 `door_08_ip`。这些字段默认留空，表示使用 `building_id` 对应的内置楼栋 IP 规则。
+
+如果现场抓包发现某个号机 IP 和预设不一致，只需要填写对应字段。例如只覆盖 2 号机：
+
+```yaml
+door_02_ip: "192.168.16.250"
+```
+
+没有出现在当前楼栋规则里的号机不会因为填写覆盖项而被创建。例如 2栋C座的 5号机目前缺失，`door_05_ip` 留空即可；后续确认后再填。
 
 ## 1 栋 A 座门口机
 
@@ -56,5 +69,5 @@ Add-on 会写入：
 当前同步规则：
 
 - `local_ip`、`local_id`、`building_id`、`center_ip`、`property_center_ip`、API 配置以 Add-on options 为准。
-- `devices` 从楼栋规则表生成。
-- `devices` 中已经手动覆盖过的单个门口机 IP 会保留。
+- `devices` 从楼栋规则表和 `door_01_ip` 到 `door_08_ip` 覆盖项生成。
+- `/data/yunhai_config.json` 只作为运行时镜像保存，重启后会重新同步 Add-on Configuration。

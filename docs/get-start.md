@@ -58,10 +58,19 @@ property_center_ip: "192.168.16.3"
 api_host: "0.0.0.0"
 api_port: 8099
 api_token: ""
+door_01_ip: ""
+door_02_ip: ""
+door_03_ip: ""
+door_04_ip: ""
+door_05_ip: ""
+door_06_ip: ""
+door_07_ip: ""
+door_08_ip: ""
 ```
 
 如果 HA 主机实际 IP 不是 `192.168.16.64`，必须把 `local_ip` 改成 HA 主机在门禁网段上的真实地址。
 如果要测试解锁/接听动作接口，请把 `api_token` 改成一个自定义长 token。
+门口机 IP 覆盖项默认留空，表示使用当前楼栋预设；只有现场 IP 和预设不一致时再填写。
 
 ## 第一次启动后会发生什么
 
@@ -71,7 +80,7 @@ Add-on 会创建：
 /data/yunhai_config.json
 ```
 
-这个文件保存当前门口机列表和 IP。Add-on options 中的本机 IP、本机 ID、楼栋、中心地址会在每次启动时同步到该文件；门口机 IP 覆盖值会保留。
+这个文件保存当前门口机列表和 IP。Add-on Configuration 中的本机 IP、本机 ID、楼栋、中心地址和门口机 IP 覆盖项会在每次启动时同步到该文件。
 
 ## 验证方式
 
