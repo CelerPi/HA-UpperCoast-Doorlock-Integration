@@ -1,6 +1,10 @@
 # 云海湾门禁卡片
 
-Home Assistant Lovelace 自定义卡片，复刻虚拟室内机界面。
+![version](https://img.shields.io/badge/version-v0.1.5-blue)
+![hacs](https://img.shields.io/badge/hacs-default-orange)
+![ha-version](https://img.shields.io/badge/HA-2024.11.0%2B-41BDF5)
+
+云海湾虚拟门禁系统的 Home Assistant Lovelace 自定义卡片，复刻虚拟室内机界面。
 
 ## 功能
 
@@ -12,18 +16,10 @@ Home Assistant Lovelace 自定义卡片，复刻虚拟室内机界面。
 
 ## 安装
 
-### 通过 HACS 安装（推荐）
-
-1. HACS → 集成 → 右下角 → **自定义仓库**
-2. 仓库地址：`https://github.com/CelerPi/HA-UpperCoast-DoorLock-System`
-3. 类别选择：**插件**
-4. 搜索 `云海湾门禁卡片` → 下载
-
-### 手动安装
-
-1. 下载 `doorlock-card.js` 到 `config/www/` 目录
-2. 在 HA 配置中添加资源：`/local/www/doorlock-card.js`（类型：JavaScript 模块）
-3. 在 Lovelace 仪表盘中添加卡片
+1. HACS → 仪表盘 → 右下角 → **自定义仓库**
+2. 填入仓库地址：`https://github.com/CelerPi/HA-UpperCoast-DoorLock-System`
+3. 类别选择：**仪表盘**
+4. 搜索并下载 `云海湾门禁卡片`
 
 ## 使用
 
@@ -33,7 +29,7 @@ Home Assistant Lovelace 自定义卡片，复刻虚拟室内机界面。
 
 ```yaml
 type: custom:doorlock-card
-building_id: building_1_a  # 可选：楼栋 ID，默认 building_1_a
+building_id: building_1_a  # 可选，默认 building_1_a
 ```
 
 ### 楼栋 ID
@@ -53,4 +49,4 @@ building_id: building_1_a  # 可选：楼栋 ID，默认 building_1_a
 
 - Home Assistant 2024.11.0+
 - 已安装 `uppercoast_doorlock` 集成
-- 已安装 `uppercoast_doorlock` Addon（用于门禁通信）
+- 已安装 `uppercoast_doorlock` Addon

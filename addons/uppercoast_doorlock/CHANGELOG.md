@@ -1,5 +1,10 @@
 # 更新日志
 
+## 0.1.5 - 2026-05-27
+
+- 修复 HACS Lovelace 插件结构，添加 info.md
+- 分离 lovelace/ 目录作为独立 HACS 仪表盘插件
+
 ## 0.1.4 - 2026-05-27
 
 - 新增 `POST /api/monitor/start` 和 `/api/monitor/stop` 接口，支持主动监控指定门口机
