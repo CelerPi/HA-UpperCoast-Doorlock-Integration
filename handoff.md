@@ -25,9 +25,9 @@
 
 ```
 HA 集成云海湾门禁系统/
-├── repository.yaml              — HA 加载项仓库识别文件
-├── README.md                    — 项目总览和迁移计划
-├── handoff.md                   — 本文件，记录开发进度
+├── repository.json               — HACS 仓库元数据（插件类）
+├── README.md                     — 项目总览和迁移计划
+├── handoff.md                    — 本文件，记录开发进度
 ├── addons/
 │   └── uppercoast_doorlock/     — HA Addon
 │       ├── config.yaml           — addon 配置（楼栋、本机 IP/ID、门口机 IP 等）
@@ -62,6 +62,10 @@ HA 集成云海湾门禁系统/
 │       └── translations/
 │           ├── zh.json          — 中文翻译
 │           └── en.json          — 英文翻译
+├── lovelace/                    — HACS Lovelace 卡片
+│   ├── doorlock-card.js         — 卡片主文件（LitElement）
+│   ├── doorlock-card.json       — HACS 资源声明
+│   └── README.md                — 卡片使用说明
 ├── docs/                        — 使用文档
 │   ├── get-start.md
 │   ├── configuration.md
@@ -83,6 +87,7 @@ HA 集成云海湾门禁系统/
 | 第二阶段 | 创建 HA Addon 骨架 | ✅ 完成 |
 | 第三阶段 | 创建 HA 集成（实体、服务、事件） | ✅ 完成 |
 | 第四阶段 | 仪表盘卡片（Lovelace Custom Card） | ✅ 完成 |
+| 第四阶段半 | HACS 插件化（Lovelace + 集成） | ✅ 完成 |
 | 第五阶段 | 音频通话、物业中心呼叫、更多楼栋 | 待开始 |
 
 ---
@@ -284,28 +289,39 @@ HA 集成 (custom_components/uppercoast_doorlock)
 
 ## 待完善
 
-1. **第四阶段** — 仪表盘卡片开发（见上文）
+1. **第五阶段** — 音频通话、物业中心呼叫、更多楼栋
 2. **IP 冲突核实** — 192.168.23.164 需现场确认归属
 3. **2栋C座 5号机** — 待补充 IP
-4. **自动化测试** — 目前 tests/ 目录仅有 Python 单元测试
 
 ---
 
 ## 在 HA 上安装使用
 
-1. 通过 HACS 安装 `uppercoast_doorlock` 集成（或手动复制 custom_components）
-2. 重启 HA
-3. **配置 → 集成 → 添加集成 → 搜索 `虚拟门禁系统`**
-4. 填写配置：
+### 一键安装（HACS + Addon）
 
-| 字段 | 值 | 说明 |
-|------|-----|------|
-| **Addon 地址** | `192.168.16.64` | Addon 所在主机 IP |
-| **端口** | `8099` | addon API 端口 |
-| **API 令牌** | 你在 addon config 中设置的 token | 认证令牌 |
+1. **添加自定义仓库**
+   HA → HACS → 集成 → 右下角 → 自定义仓库 → 填入：
+   ```
+   仓库地址: https://github.com/CelerPi/HA-UpperCoast-DoorLock-System
+   类别: Plugin（插件）
+   ```
 
-5. 集成添加成功后可用实体：binary_sensor、camera、3个 button
-6. 自动化可订阅事件：`uppercoast_doorlock_call_started` / `uppercoast_doorlock_call_ended`
+2. **安装集成和卡片**
+   刷新 HACS 页面，找到：
+   - **虚拟门禁系统**（集成）→ 下载
+   - **云海湾门禁卡片**（插件）→ 下载
+
+3. **安装 Add-on**
+   配置 → Add-on Store → Repositories → 添加同一仓库 URL → 搜索"虚拟门禁系统" → 安装
+
+4. **配置集成**
+   重启 HA → 配置 → 集成 → 添加集成 → 搜索 `虚拟门禁系统`
+
+### 手动安装
+
+1. 复制 `custom_components/uppercoast_doorlock/` 到 HA 配置目录
+2. 复制 `lovelace/doorlock-card.js` 到 `config/www/`
+3. 在 HA 配置中添加资源：`/local/www/doorlock-card.js`（类型：JavaScript 模块）
 
 ### 自动化示例
 
