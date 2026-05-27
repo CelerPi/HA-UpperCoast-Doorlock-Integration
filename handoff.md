@@ -29,7 +29,7 @@ HA 集成云海湾门禁系统/
 ├── README.md                    — 项目总览和迁移计划
 ├── handoff.md                   — 本文件，记录开发进度
 ├── addons/
-│   └── uppercoast_doorlock/     — HA Addon（第二阶段产物）
+│   └── uppercoast_doorlock/     — HA Addon
 │       ├── config.yaml           — addon 配置（楼栋、本机 IP/ID、门口机 IP 等）
 │       ├── Dockerfile
 │       ├── run.sh
@@ -38,16 +38,30 @@ HA 集成云海湾门禁系统/
 │       ├── app/
 │       │   └── uppercoast_doorlock/
 │       │       ├── __init__.py
-│       │       ├── api.py            — HTTP API 服务（/health、/api/status、/api/unlock、/api/answer）
-│       │       ├── call_state.py     — 呼叫状态跟踪
-│       │       ├── config.py         — 配置加载、BUILDING_IPS_BY_ID 等
-│       │       ├── core.py           — IntercomCore：UDP 监听、视频组装、解锁协议核心
-│       │       ├── protocol.py        — UDP payload 构建和解析
-│       │       ├── server.py         — 入口，启动 core + api_server
+│       │       ├── api.py            — HTTP API（/health、/api/status、/api/frame、/api/unlock、/api/answer、/api/hangup）
+│       │       ├── call_state.py    — 呼叫状态跟踪
+│       │       ├── config.py        — 配置加载、BUILDING_IPS_BY_ID 等
+│       │       ├── core.py          — IntercomCore：UDP 监听、视频组装、解锁协议核心
+│       │       ├── protocol.py      — UDP payload 构建和解析
+│       │       ├── server.py        — 入口，启动 core + api_server
 │       │       └── store.py
 │       └── translations/
-├── custom_components/            — HA 集成（第三阶段产物，本文档重点）
+├── custom_components/           — HA 集成（第三阶段）
 │   └── uppercoast_doorlock/
+│       ├── __init__.py          — 集成入口
+│       ├── manifest.json         — 集成元数据，config_flow:true
+│       ├── const.py             — DOMAIN 常量
+│       ├── api.py               — HTTP 客户端
+│       ├── coordinator.py       — 定时轮询 + 事件发布
+│       ├── binary_sensor.py     — 门禁呼叫状态实体
+│       ├── camera.py            — 门禁视频实体
+│       ├── button.py            — 解锁/接听/挂断 三个按钮实体
+│       ├── services.py          — HA 服务调用实现
+│       ├── services.yaml        — 服务声明
+│       ├── config_flow.py       — UI 配置入口
+│       └── translations/
+│           ├── zh.json          — 中文翻译
+│           └── en.json          — 英文翻译
 ├── docs/                        — 使用文档
 │   ├── get-start.md
 │   ├── configuration.md
@@ -67,40 +81,23 @@ HA 集成云海湾门禁系统/
 |------|------|------|
 | 第一阶段 | 整理原型，拆清职责 | ✅ 完成 |
 | 第二阶段 | 创建 HA Addon 骨架 | ✅ 完成 |
-| 第三阶段 | 创建 HA 集成（实体、服务、事件） | ✅ 完成（部分） |
-| 第四阶段 | 仪表盘卡片 | 待开始 |
+| 第三阶段 | 创建 HA 集成（实体、服务、事件） | ✅ 完成 |
+| 第四阶段 | 仪表盘卡片（Lovelace Custom Card） | **进行中** |
 | 第五阶段 | 音频通话、物业中心呼叫、更多楼栋 | 待开始 |
 
 ---
 
 ## 第三阶段：HA 集成（custom_components）
 
-目标：创建 Home Assistant 集成，提供设备、实体、服务调用和事件订阅。
+### 实体列表（当前版本 v0.1.3）
 
-### 新建文件
-
-```
-custom_components/uppercoast_doorlock/
-├── __init__.py       — 集成入口，注册 ConfigFlow、服务、coordinator
-├── manifest.json     — 集成元数据，声明支持平台和依赖 aiohttp
-├── const.py          — DOMAIN 常量
-├── api.py            — HTTP 客户端，封装 unlock/answer/status API 调用
-├── coordinator.py    — 定时轮询 /api/status，状态变化时发布 HA 事件
-├── entity.py         — 4 个实体（见下表）
-├── services.py      — unlock / answer 服务实现
-├── services.yaml    — 服务声明，供 HA UI 和自动化消费
-└── config_flow.py   — 用户 UI 配置入口（host / port / token）
-```
-
-### 实体列表
-
-| 实体类型 | 名称 | 说明 |
-|----------|------|------|
-| binary_sensor | 门禁呼叫状态 | 是否有活跃呼叫；attributes 含门口机详情 |
-| camera | 门禁视频 | 通过 /api/frame 获取当前 JPEG 帧 |
-| button | 门禁解锁 | 点击触发 /api/unlock |
-| button | 门禁接听 | 点击触发 /api/answer |
-| button | 门禁挂断 | 点击触发 /api/hangup |
+| 实体类型 | 名称 | 图标 | 说明 |
+|----------|------|------|------|
+| binary_sensor | 门禁呼叫状态 | mdi:doorbell-video | 是否有活跃呼叫；attributes 含门口机详情 |
+| camera | 门禁视频 | mdi:cctv | 通过 /api/frame 获取当前 JPEG 帧 |
+| button | 门禁解锁 | mdi:door-open | 点击触发 /api/unlock |
+| button | 门禁接听 | mdi:phone | 点击触发 /api/answer |
+| button | 门禁挂断 | mdi:phone-hangup | 点击触发 /api/hangup |
 
 ### 事件列表
 
@@ -115,7 +112,6 @@ custom_components/uppercoast_doorlock/
 - `uppercoast_doorlock.unlock` — 解锁门口机
 - `uppercoast_doorlock.answer` — 接听呼叫
 - `uppercoast_doorlock.hangup` — 挂断通话
-- `uppercoast_doorlock.answer` — 接听呼叫
 
 ### addon 与集成的通信关系
 
@@ -123,16 +119,51 @@ custom_components/uppercoast_doorlock/
 HA Addon (addon/uppercoast_doorlock)
   ├── 绑定 UDP 10000/10008 监听门外机呼叫
   ├── /api/status     ← 集成每 1 秒轮询
-  ├── /api/frame     ← 集成获取当前 JPEG 视频帧
-  ├── /api/unlock    ← 集成调用（解锁）
-  ├── /api/answer    ← 集成调用（接听）
-  └── /api/hangup    ← 集成调用（挂断）
+  ├── /api/frame      ← 集成获取当前 JPEG 视频帧
+  ├── /api/unlock     ← 集成调用（解锁）
+  ├── /api/answer     ← 集成调用（接听）
+  └── /api/hangup     ← 集成调用（挂断）
 
 HA 集成 (custom_components/uppercoast_doorlock)
   ├── 定时轮询 addon /api/status
   ├── 状态变化 → 发布 HA 事件到 bus
   └── 提供实体（binary_sensor / camera / 3×button）
 ```
+
+### 版本历史
+
+| 版本 | 变更 |
+|------|------|
+| v0.1.0 | 初始版本，应用目录和标识统一 |
+| v0.1.1 | 新增 /api/frame、/api/hangup 接口 |
+| v0.1.2 | 修复 update_interval 类型错误；添加中英文翻译 |
+| v0.1.3 | 实体拆分独立平台文件；修复 button 平台漏加载 |
+
+---
+
+## 第四阶段：仪表盘卡片（进行中）
+
+**目标**：创建 Lovelace Custom Card，复刻虚拟室内机界面和弹窗交互。
+
+### 计划功能
+
+1. **门口机卡片**：显示各个门口机状态，点击可启动主动监控
+2. **呼叫弹窗**：呼入时自动弹出，显示视频画面 + 解锁/接听/挂断按钮
+3. **呼入自动弹出**：通过监听 `uppercoast_doorlock_call_started` 事件自动触发
+
+### 技术方案
+
+- 使用 HA Custom Card（JavaScript）开发
+- 通过 HA API 获取实时视频帧（/api/frame）
+- 调用 HA 服务 `uppercoast_doorlock.unlock/answer/hangup`
+
+### 待做事项
+
+- [ ] 创建 custom_cards 目录结构
+- [ ] 实现门口机列表卡片
+- [ ] 实现呼叫弹窗（含视频 + 按钮）
+- [ ] 实现呼入自动弹出逻辑
+- [ ] 与 HA Dashboard 集成配置示例
 
 ---
 
@@ -255,18 +286,26 @@ HA 集成 (custom_components/uppercoast_doorlock)
 
 ## 待完善
 
-1. **IP 冲突核实** — 192.168.23.164 需现场确认归属
-2. **2栋C座 5号机** — 待补充 IP
-3. **自动化测试** — 目前 tests/ 目录仅有 Python 单元测试，无 HA 集成级测试
+1. **第四阶段** — 仪表盘卡片开发（见上文）
+2. **IP 冲突核实** — 192.168.23.164 需现场确认归属
+3. **2栋C座 5号机** — 待补充 IP
+4. **自动化测试** — 目前 tests/ 目录仅有 Python 单元测试
 
 ---
 
-## 在 HA 上安装使用（第三阶段完成后）
+## 在 HA 上安装使用
 
-1. 复制 `custom_components/uppercoast_doorlock/` 到 HA 配置目录
+1. 通过 HACS 安装 `uppercoast_doorlock` 集成（或手动复制 custom_components）
 2. 重启 HA
-3. **配置 → 集成 → 添加集成 → 搜索 `uppercoast_doorlock`**
-4. 填写 addon 的 host / port / token
+3. **配置 → 集成 → 添加集成 → 搜索 `虚拟门禁系统`**
+4. 填写配置：
+
+| 字段 | 值 | 说明 |
+|------|-----|------|
+| **Addon 地址** | `192.168.16.64` | Addon 所在主机 IP |
+| **端口** | `8099` | addon API 端口 |
+| **API 令牌** | 你在 addon config 中设置的 token | 认证令牌 |
+
 5. 集成添加成功后可用实体：binary_sensor、camera、3个 button
 6. 自动化可订阅事件：`uppercoast_doorlock_call_started` / `uppercoast_doorlock_call_ended`
 
