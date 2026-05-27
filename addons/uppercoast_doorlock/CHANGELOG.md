@@ -1,5 +1,9 @@
 # 更新日志
 
+## 0.1.8 - 2026-05-28
+
+- 修复卡片 import 方式：使用 'lit' 代替 unpkg URL，解决 "Custom element doesn't exist" 错误
+
 ## 0.1.5 - 2026-05-27
 
 - 修复 HACS Lovelace 插件结构，添加 info.md
