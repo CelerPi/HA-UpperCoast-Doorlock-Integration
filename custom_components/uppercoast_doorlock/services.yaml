@@ -51,3 +51,17 @@ monitor_stop:
       description: 要停止监控的门口机IP地址
       example: "192.168.16.225"
       required: true
+
+send_audio:
+  name: 发送音频
+  description: 向指定门口机发送 PCM 音频数据（8kHz/16-bit/单声道）
+  fields:
+    target_ip:
+      name: 门口机IP
+      description: 目标门口机IP地址
+      example: "192.168.16.225"
+      required: true
+    pcm:
+      name: PCM数据
+      description: Base64编码的16-bit little-endian PCM音频数据
+      required: true

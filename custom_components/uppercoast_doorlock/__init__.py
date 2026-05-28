@@ -5,10 +5,12 @@ from typing import Any
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from homeassistant.components.http import HomeAssistantView
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TOKEN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
+from aiohttp import web
 
 from .api import UpperCoastDoorlockClient
 from .const import DOMAIN
@@ -37,6 +39,55 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
+def _get_entry_data(hass: HomeAssistant) -> dict[str, Any] | None:
+    entries = hass.config_entries.async_entries(DOMAIN)
+    if not entries:
+        return None
+    return hass.data[DOMAIN].get(entries[0].entry_id)
+
+
+class UpperCoastDoorlockAudioView(HomeAssistantView):
+    """提供音频数据获取和发送的 HTTP 端点。"""
+
+    url = "/api/uppercoast_doorlock/audio"
+    name = "api:uppercoast_doorlock:audio"
+    requires_auth = True
+
+    async def get(self, request: web.Request) -> web.Response:
+        hass = request.app["hass"]
+        entry_data = _get_entry_data(hass)
+        if not entry_data:
+            return web.json_response({"ok": False, "error": "not_configured"})
+
+        since = int(request.query.get("since", 0))
+        client: UpperCoastDoorlockClient = entry_data["client"]
+        try:
+            result = await client.async_get_audio(since)
+            return web.json_response(result)
+        except Exception as exc:
+            return web.json_response({"ok": False, "error": str(exc)})
+
+    async def post(self, request: web.Request) -> web.Response:
+        hass = request.app["hass"]
+        entry_data = _get_entry_data(hass)
+        if not entry_data:
+            return web.json_response({"ok": False, "error": "not_configured"})
+
+        try:
+            data = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"})
+
+        client: UpperCoastDoorlockClient = entry_data["client"]
+        try:
+            result = await client.async_send_audio(
+                data.get("target_ip", ""), data.get("pcm", "")
+            )
+            return web.json_response(result)
+        except Exception as exc:
+            return web.json_response({"ok": False, "error": str(exc)})
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
     port = entry.data[CONF_PORT]
@@ -53,6 +104,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     setup_services(hass)
+    hass.http.register_view(UpperCoastDoorlockAudioView())
     await hass.config_entries.async_forward_entry_setups(entry, ("binary_sensor", "camera", "button"))
 
     return True

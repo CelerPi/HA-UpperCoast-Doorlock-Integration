@@ -27,9 +27,13 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self) -> dict[str, Any]:
         status = await self._client.async_get_status()
-        new = status.get("runtime", {})
-        self._detect_and_publish_events(new)
-        return new
+        runtime = status.get("runtime", {})
+        config = status.get("config", {})
+        self._detect_and_publish_events(runtime)
+        return {
+            "runtime": runtime,
+            "config": config,
+        }
 
     @callback
     def _detect_and_publish_events(self, new: dict[str, Any]) -> None:

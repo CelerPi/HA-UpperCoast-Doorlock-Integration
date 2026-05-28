@@ -106,11 +106,31 @@ def setup_services(hass: HomeAssistant) -> None:
         except Exception as exc:
             _LOGGER.error("停止监控请求异常: %s", exc)
 
+    async def async_call_send_audio(service: ServiceCall) -> None:
+        entry_data = _get_entry_data(hass)
+        if not entry_data:
+            _LOGGER.warning("uppercoast_doorlock 未配置，无法发送音频")
+            return
+
+        client: UpperCoastDoorlockClient = entry_data["client"]
+        target_ip = service.data.get("target_ip")
+        pcm = service.data.get("pcm")
+        if not target_ip or not pcm:
+            _LOGGER.warning("发送音频需要指定 target_ip 和 pcm")
+            return
+        try:
+            result = await client.async_send_audio(target_ip, pcm)
+            if not result.get("ok"):
+                _LOGGER.warning("发送音频失败: %s", result.get("error"))
+        except Exception as exc:
+            _LOGGER.error("发送音频请求异常: %s", exc)
+
     hass.services.async_register(DOMAIN, "unlock", async_call_unlock)
     hass.services.async_register(DOMAIN, "answer", async_call_answer)
     hass.services.async_register(DOMAIN, "hangup", async_call_hangup)
     hass.services.async_register(DOMAIN, "monitor_start", async_call_monitor_start)
     hass.services.async_register(DOMAIN, "monitor_stop", async_call_monitor_stop)
+    hass.services.async_register(DOMAIN, "send_audio", async_call_send_audio)
 
 
 def _get_entry_data(hass: HomeAssistant) -> dict[str, Any] | None:

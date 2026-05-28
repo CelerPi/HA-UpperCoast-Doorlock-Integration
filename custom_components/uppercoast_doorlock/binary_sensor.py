@@ -12,7 +12,7 @@ from typing import ClassVar
 
 
 class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
-    """表示当前是否有活跃呼叫。attributes 中附带当前门口机详情。"""
+    """表示当前是否有活跃呼叫。attributes 中附带当前门口机详情及设备列表。"""
 
     _attr_name = "门禁呼叫状态"
     _attr_icon = "mdi:doorbell-video"
@@ -30,20 +30,31 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         data = self.coordinator.data or {}
-        return bool(data.get("in_call", False))
+        runtime = data.get("runtime", {})
+        return bool(runtime.get("in_call", False))
 
     @property
     def extra_state_attributes(self) -> dict[str, str]:
         data = self.coordinator.data or {}
-        if not data.get("in_call"):
-            return {}
-        return {
-            "device_name": data.get("device_name", ""),
-            "display_name": data.get("display_name", ""),
-            "target_ip": data.get("target_ip", ""),
-            "floor_label": data.get("floor_label", ""),
-            "position_detail": data.get("position_detail", ""),
+        runtime = data.get("runtime", {})
+        config = data.get("config", {})
+
+        attrs: dict[str, str] = {
+            "building_id": config.get("building_id", ""),
+            "building_name": config.get("building_name", ""),
+            "devices": config.get("devices", []),
         }
+
+        if runtime.get("in_call"):
+            attrs.update({
+                "device_name": runtime.get("device_name", ""),
+                "display_name": runtime.get("display_name", ""),
+                "target_ip": runtime.get("target_ip", ""),
+                "floor_label": runtime.get("floor_label", ""),
+                "position_detail": runtime.get("position_detail", ""),
+            })
+
+        return attrs
 
 
 async def async_setup_entry(

@@ -82,3 +82,23 @@ class UpperCoastDoorlockClient:
                 timeout=aiohttp.ClientTimeout(total=5),
             )
             return await resp.json()
+
+    async def async_get_audio(self, since: int = 0) -> dict[str, Any]:
+        async with aiohttp.ClientSession() as session:
+            resp = await session.get(
+                f"{self._base_url}/api/audio?since={since}",
+                headers={"Authorization": f"Bearer {self._token}"},
+                timeout=aiohttp.ClientTimeout(total=5),
+            )
+            resp.raise_for_status()
+            return await resp.json()
+
+    async def async_send_audio(self, target_ip: str, pcm: str) -> dict[str, Any]:
+        async with aiohttp.ClientSession() as session:
+            resp = await session.post(
+                f"{self._base_url}/api/audio",
+                json={"target_ip": target_ip, "pcm": pcm},
+                headers={"Authorization": f"Bearer {self._token}"},
+                timeout=aiohttp.ClientTimeout(total=5),
+            )
+            return await resp.json()
