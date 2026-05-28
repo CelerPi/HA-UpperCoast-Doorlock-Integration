@@ -1,11 +1,20 @@
 # 更新日志
 
+## v0.1.3
+
+- `binary_sensor` 实体 ID 缩短为 `binary_sensor.vds_call_status`
+  - 解决原有名称过长、在 HA 中显示为拼音的问题
+
 ## v0.1.2
 
-- Coordinator 增加连接失败时的详细错误日志（Addon 地址 + 异常原因）
-- 当 Addon 返回空设备列表时增加警告日志
-- `binary_sensor` 属性新增 `api_url`、`device_count`、`connection_status`
+- **关键修复：Addon 离线时实体也能被创建**
+  - Coordinator 连接失败时不再抛出 `UpdateFailed` 阻塞实体创建
+  - 返回空数据并记录 `connection_error`，实体以离线状态存在
+  - 日志增加退避机制（前 3 次及每 60 次记录一次），避免刷屏
+- `binary_sensor` 属性增强
+  - 新增 `api_url`、`device_count`、`connection_status`、`connection_error`
   - 便于在 HA 开发者工具中直接查看 Integration 与 Addon 的连接状态
+- `camera`、`button` 增加异常捕获，Addon 离线时操作不会崩溃
 
 ## v0.1.1
 

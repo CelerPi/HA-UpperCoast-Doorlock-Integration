@@ -30,9 +30,13 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
         target_ip = data.get("target_ip", "")
-        if target_ip:
+        if not target_ip:
+            return
+        try:
             client = self.coordinator._client
             await client.async_unlock(target_ip)
+        except Exception as exc:
+            _LOGGER.error("解锁失败: %s", exc)
 
 
 class UpperCoastDoorlockButtonAnswer(ButtonEntity):
@@ -54,9 +58,13 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
         target_ip = data.get("target_ip", "")
-        if target_ip:
+        if not target_ip:
+            return
+        try:
             client = self.coordinator._client
             await client.async_answer(target_ip)
+        except Exception as exc:
+            _LOGGER.error("接听失败: %s", exc)
 
 
 class UpperCoastDoorlockButtonHangup(ButtonEntity):
@@ -78,9 +86,13 @@ class UpperCoastDoorlockButtonHangup(ButtonEntity):
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
         target_ip = data.get("target_ip", "")
-        if target_ip:
+        if not target_ip:
+            return
+        try:
             client = self.coordinator._client
             await client.async_hangup(target_ip)
+        except Exception as exc:
+            _LOGGER.error("挂断失败: %s", exc)
 
 
 async def async_setup_entry(

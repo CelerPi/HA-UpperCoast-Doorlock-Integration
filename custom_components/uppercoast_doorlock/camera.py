@@ -33,8 +33,11 @@ class UpperCoastDoorlockCamera(Camera):
         return bool(data.get("has_frame", False))
 
     async def async_camera_image(self) -> bytes | None:
-        client = self.coordinator._client
-        return await client.async_get_frame()
+        try:
+            client = self.coordinator._client
+            return await client.async_get_frame()
+        except Exception:
+            return None
 
     async def stream_source(self) -> str | None:
         return None

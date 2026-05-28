@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Any
 
 from homeassistant.core import callback
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import UpperCoastDoorlockClient
 
@@ -24,17 +24,26 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
         )
         self._client = client
         self._previous: dict[str, Any] = {}
+        self._consecutive_errors = 0
 
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             status = await self._client.async_get_status()
+            self._consecutive_errors = 0
         except Exception as exc:
-            _LOGGER.error(
-                "无法连接到门禁 Addon (%s): %s",
-                self._client._base_url,
-                exc,
-            )
-            raise UpdateFailed(f"连接 Addon 失败: {exc}") from exc
+            self._consecutive_errors += 1
+            # 前 3 次及每 60 次记录一次，避免日志刷屏
+            if self._consecutive_errors <= 3 or self._consecutive_errors % 60 == 0:
+                _LOGGER.error(
+                    "无法连接到门禁 Addon (%s): %s",
+                    self._client._base_url,
+                    exc,
+                )
+            return {
+                "runtime": {},
+                "config": {},
+                "connection_error": str(exc),
+            }
 
         runtime = status.get("runtime", {})
         config = status.get("config", {})

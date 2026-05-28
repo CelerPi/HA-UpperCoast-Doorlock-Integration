@@ -16,7 +16,7 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
 
     _attr_name = "门禁呼叫状态"
     _attr_icon = "mdi:doorbell-video"
-    _attr_unique_id: ClassVar[str] = "uppercoast_doorlock_call_active"
+    _attr_unique_id: ClassVar[str] = "vds_call_status"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
@@ -39,6 +39,7 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
         runtime = data.get("runtime", {})
         config = data.get("config", {})
         devices = config.get("devices", [])
+        connection_error = data.get("connection_error", "")
 
         client = getattr(self.coordinator, "_client", None)
         api_url = getattr(client, "_base_url", "") if client else ""
@@ -49,8 +50,11 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
             "devices": devices,
             "device_count": len(devices),
             "api_url": api_url,
-            "connection_status": "connected" if config else "disconnected",
+            "connection_status": "disconnected" if connection_error else "connected",
         }
+
+        if connection_error:
+            attrs["connection_error"] = connection_error
 
         if runtime.get("in_call"):
             attrs.update({
