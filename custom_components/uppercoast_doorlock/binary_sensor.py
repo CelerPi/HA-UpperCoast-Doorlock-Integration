@@ -14,7 +14,8 @@ from typing import ClassVar
 class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
     """表示当前是否有活跃呼叫。attributes 中附带当前门口机详情及设备列表。"""
 
-    _attr_name = "门禁呼叫状态"
+    _attr_has_entity_name = True
+    _attr_translation_key = "call_status"
     _attr_icon = "mdi:doorbell-video"
     _attr_unique_id: ClassVar[str] = "vds_call_status"
 
@@ -22,7 +23,7 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
         self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
-            name="虚拟门禁系统",
+            name="VDS",
             manufacturer="UpperCoast",
             model="麦驰可视对讲",
         )

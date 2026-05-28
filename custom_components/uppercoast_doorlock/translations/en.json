@@ -37,5 +37,28 @@
         }
       }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "call_status": {
+        "name": "Call Status"
+      }
+    },
+    "camera": {
+      "video": {
+        "name": "Video"
+      }
+    },
+    "button": {
+      "unlock": {
+        "name": "Unlock"
+      },
+      "answer": {
+        "name": "Answer"
+      },
+      "hangup": {
+        "name": "Hang Up"
+      }
+    }
   }
 }

@@ -37,5 +37,28 @@
         }
       }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "call_status": {
+        "name": "呼叫状态"
+      }
+    },
+    "camera": {
+      "video": {
+        "name": "视频"
+      }
+    },
+    "button": {
+      "unlock": {
+        "name": "解锁"
+      },
+      "answer": {
+        "name": "接听"
+      },
+      "hangup": {
+        "name": "挂断"
+      }
+    }
   }
 }

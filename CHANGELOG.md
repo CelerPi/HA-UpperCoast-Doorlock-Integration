@@ -1,5 +1,18 @@
 # 更新日志
 
+## v0.1.4
+
+- **所有实体 ID 改为英文，彻底解决拼音问题**
+  - 为 `binary_sensor`、`camera`、`button` 添加 `translation_key` 和 `has_entity_name = True`
+  - DeviceInfo name 改为英文缩写 "VDS"
+  - 新增中英翻译文件中的 `entity` 字段
+  - 新的实体 ID：
+    - `binary_sensor.vds_call_status`
+    - `camera.vds_video`
+    - `button.vds_unlock`
+    - `button.vds_answer`
+    - `button.vds_hangup`
+
 ## v0.1.3
 
 - `binary_sensor` 实体 ID 缩短为 `binary_sensor.vds_call_status`

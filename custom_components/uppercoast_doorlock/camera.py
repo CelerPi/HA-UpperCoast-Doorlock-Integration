@@ -14,15 +14,16 @@ from homeassistant.config_entries import ConfigEntry
 class UpperCoastDoorlockCamera(Camera):
     """实时视频帧摄像头实体。"""
 
-    _attr_name = "门禁视频"
-    _attr_unique_id: ClassVar[str] = "uppercoast_doorlock_camera"
+    _attr_has_entity_name = True
+    _attr_translation_key = "video"
+    _attr_unique_id: ClassVar[str] = "vds_camera"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         Camera.__init__(self)
         self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
-            name="虚拟门禁系统",
+            name="VDS",
             manufacturer="UpperCoast",
             model="麦驰可视对讲",
         )

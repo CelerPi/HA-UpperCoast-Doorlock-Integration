@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from homeassistant.core import HomeAssistant
 from homeassistant.components.button import ButtonEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -10,19 +12,22 @@ from .coordinator import UpperCoastDoorlockCoordinator
 from .const import DOMAIN
 from homeassistant.config_entries import ConfigEntry
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class UpperCoastDoorlockButtonUnlock(ButtonEntity):
     """解锁按钮。"""
 
-    _attr_name = "门禁解锁"
+    _attr_has_entity_name = True
+    _attr_translation_key = "unlock"
     _attr_icon = "mdi:door-open"
-    _attr_unique_id: ClassVar[str] = "uppercoast_doorlock_button_unlock"
+    _attr_unique_id: ClassVar[str] = "vds_button_unlock"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
-            name="虚拟门禁系统",
+            name="VDS",
             manufacturer="UpperCoast",
             model="麦驰可视对讲",
         )
@@ -42,15 +47,16 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
 class UpperCoastDoorlockButtonAnswer(ButtonEntity):
     """接听按钮。"""
 
-    _attr_name = "门禁接听"
+    _attr_has_entity_name = True
+    _attr_translation_key = "answer"
     _attr_icon = "mdi:phone"
-    _attr_unique_id: ClassVar[str] = "uppercoast_doorlock_button_answer"
+    _attr_unique_id: ClassVar[str] = "vds_button_answer"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
-            name="虚拟门禁系统",
+            name="VDS",
             manufacturer="UpperCoast",
             model="麦驰可视对讲",
         )
@@ -70,15 +76,16 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
 class UpperCoastDoorlockButtonHangup(ButtonEntity):
     """挂断按钮。"""
 
-    _attr_name = "门禁挂断"
+    _attr_has_entity_name = True
+    _attr_translation_key = "hangup"
     _attr_icon = "mdi:phone-hangup"
-    _attr_unique_id: ClassVar[str] = "uppercoast_doorlock_button_hangup"
+    _attr_unique_id: ClassVar[str] = "vds_button_hangup"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
-            name="虚拟门禁系统",
+            name="VDS",
             manufacturer="UpperCoast",
             model="麦驰可视对讲",
         )
