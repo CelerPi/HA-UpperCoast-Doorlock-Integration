@@ -2,7 +2,7 @@
 
 ![version](https://img.shields.io/badge/version-v0.1.5-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
-![ha-version](https://img.shields.io/badge/HA-2024.11.0%2B-41BDF5)
+![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
 云海湾虚拟门禁系统的 Home Assistant Lovelace 自定义卡片，复刻虚拟室内机界面。
 
@@ -47,6 +47,6 @@ building_id: building_1_a  # 可选，默认 building_1_a
 
 ## 依赖
 
-- Home Assistant 2024.11.0+
+- Home Assistant 2026.5.0+
 - 已安装 `uppercoast_doorlock` 集成
 - 已安装 `uppercoast_doorlock` Addon
