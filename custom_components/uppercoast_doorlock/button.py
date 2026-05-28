@@ -22,6 +22,7 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
     _attr_translation_key = "unlock"
     _attr_icon = "mdi:door-open"
     _attr_unique_id: ClassVar[str] = "vds_button_unlock"
+    _attr_suggested_object_id: ClassVar[str] = "vds_button_unlock"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
@@ -51,6 +52,7 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
     _attr_translation_key = "answer"
     _attr_icon = "mdi:phone"
     _attr_unique_id: ClassVar[str] = "vds_button_answer"
+    _attr_suggested_object_id: ClassVar[str] = "vds_button_answer"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator
@@ -80,6 +82,7 @@ class UpperCoastDoorlockButtonHangup(ButtonEntity):
     _attr_translation_key = "hangup"
     _attr_icon = "mdi:phone-hangup"
     _attr_unique_id: ClassVar[str] = "vds_button_hangup"
+    _attr_suggested_object_id: ClassVar[str] = "vds_button_hangup"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator

@@ -8,7 +8,7 @@ from .const import DOMAIN
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.helpers.device_registry import DeviceInfo
-from typing import ClassVar
+from typing import Any, ClassVar
 
 
 class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
@@ -18,6 +18,7 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
     _attr_translation_key = "call_status"
     _attr_icon = "mdi:doorbell-video"
     _attr_unique_id: ClassVar[str] = "vds_call_status"
+    _attr_suggested_object_id: ClassVar[str] = "vds_call_status"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         self.coordinator = coordinator

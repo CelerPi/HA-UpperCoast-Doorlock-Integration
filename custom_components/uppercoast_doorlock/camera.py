@@ -16,7 +16,8 @@ class UpperCoastDoorlockCamera(Camera):
 
     _attr_has_entity_name = True
     _attr_translation_key = "video"
-    _attr_unique_id: ClassVar[str] = "vds_camera"
+    _attr_unique_id: ClassVar[str] = "vds_video"
+    _attr_suggested_object_id: ClassVar[str] = "vds_video"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
         Camera.__init__(self)

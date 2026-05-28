@@ -1,5 +1,19 @@
 # 更新日志
 
+## v0.1.5
+
+- **彻底修复实体 ID 再次变回拼音的问题**
+  - 为所有实体显式添加 `_attr_suggested_object_id`
+  - 强制 Home Assistant 使用指定的英文 entity_id，不再依赖设备名称推导
+  - 新 entity_id 与之前保持一致：
+    - `binary_sensor.vds_call_status`
+    - `camera.vds_video`
+    - `button.vds_button_unlock`
+    - `button.vds_button_answer`
+    - `button.vds_button_hangup`
+- `camera` 实体的 `unique_id` 从 `vds_camera` 修正为 `vds_video`，与卡片引用完全一致
+- 修复 `binary_sensor.py` 运行时类型注解缺少 `Any` 导入的隐患
+
 ## v0.1.4
 
 - **所有实体 ID 改为英文，彻底解决拼音问题**
