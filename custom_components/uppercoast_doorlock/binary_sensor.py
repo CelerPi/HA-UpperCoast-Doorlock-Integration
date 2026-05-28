@@ -34,15 +34,22 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
         return bool(runtime.get("in_call", False))
 
     @property
-    def extra_state_attributes(self) -> dict[str, str]:
+    def extra_state_attributes(self) -> dict[str, Any]:
         data = self.coordinator.data or {}
         runtime = data.get("runtime", {})
         config = data.get("config", {})
+        devices = config.get("devices", [])
 
-        attrs: dict[str, str] = {
+        client = getattr(self.coordinator, "_client", None)
+        api_url = getattr(client, "_base_url", "") if client else ""
+
+        attrs: dict[str, Any] = {
             "building_id": config.get("building_id", ""),
             "building_name": config.get("building_name", ""),
-            "devices": config.get("devices", []),
+            "devices": devices,
+            "device_count": len(devices),
+            "api_url": api_url,
+            "connection_status": "connected" if config else "disconnected",
         }
 
         if runtime.get("in_call"):

@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.1.2
+
+- Coordinator 增加连接失败时的详细错误日志（Addon 地址 + 异常原因）
+- 当 Addon 返回空设备列表时增加警告日志
+- `binary_sensor` 属性新增 `api_url`、`device_count`、`connection_status`
+  - 便于在 HA 开发者工具中直接查看 Integration 与 Addon 的连接状态
+
 ## v0.1.1
 
 - 新增 HTTP 音频接口 `GET/POST /api/uppercoast_doorlock/audio`
