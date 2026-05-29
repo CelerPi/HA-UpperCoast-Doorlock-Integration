@@ -66,7 +66,7 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
         prev = self._previous
 
         if new.get("in_call") and not prev.get("in_call"):
-            self._hass.bus.async_fire("uppercoast_doorlock_call_started", {
+            self.hass.bus.async_fire("uppercoast_doorlock_call_started", {
                 "device_name": new.get("device_name", ""),
                 "display_name": new.get("display_name", ""),
                 "target_ip": new.get("target_ip", ""),
@@ -75,14 +75,14 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
             })
 
         if not new.get("in_call") and prev.get("in_call"):
-            self._hass.bus.async_fire("uppercoast_doorlock_call_ended", {
+            self.hass.bus.async_fire("uppercoast_doorlock_call_ended", {
                 "device_name": prev.get("device_name", ""),
                 "display_name": prev.get("display_name", ""),
                 "target_ip": prev.get("target_ip", ""),
             })
 
         if new.get("frame_id") and new.get("frame_id") != prev.get("frame_id"):
-            self._hass.bus.async_fire("uppercoast_doorlock_frame_received", {
+            self.hass.bus.async_fire("uppercoast_doorlock_frame_received", {
                 "frame_id": new.get("frame_id"),
             })
 
