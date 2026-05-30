@@ -1,5 +1,19 @@
 # 更新日志
 
+## v0.1.8
+
+- **修复 Coordinator 事件总线属性错误**
+  - `coordinator.py` 中 `self._hass` 修正为 `self.hass`，恢复呼叫/挂断/帧事件派发
+- **所有实体正确继承 `CoordinatorEntity`**
+  - `binary_sensor.py`、`camera.py`、`button.py` 统一继承 `CoordinatorEntity`
+  - 解决实体状态不随 Coordinator 刷新而更新的问题（`binary_sensor` 始终为 `off` 的根因）
+- **修复 `camera.py` 读取 `has_frame` 层级错误**
+  - 从 `data.get("has_frame")` 修正为 `data["runtime"]["has_frame"]`
+- **修复 `button.py` 读取 `target_ip` 层级错误**
+  - 从 `data.get("target_ip")` 修正为 `data["runtime"]["target_ip"]`，恢复解锁/接听/挂断功能
+- **修复 `async_unload_entry` API 调用**
+  - `hass.config_entries.async_unload_entries` 修正为 `async_unload_platforms`
+
 ## v0.1.5
 
 - **彻底修复实体 ID 再次变回拼音的问题**
