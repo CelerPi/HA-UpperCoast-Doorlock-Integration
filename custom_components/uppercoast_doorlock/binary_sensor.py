@@ -34,7 +34,9 @@ class UpperCoastDoorlockBinarySensor(CoordinatorEntity, BinarySensorEntity):
     def is_on(self) -> bool:
         data = self.coordinator.data or {}
         runtime = data.get("runtime", {})
-        return bool(runtime.get("in_call", False))
+        if not runtime.get("in_call", False):
+            return False
+        return runtime.get("session_type") == "call"
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

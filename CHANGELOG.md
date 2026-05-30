@@ -1,5 +1,11 @@
 # 更新日志
 
+## v0.1.9
+
+- **`binary_sensor` 区分呼叫与监控状态**
+  - `is_on` 仅在 Addon 返回 `session_type == "call"` 时返回 `True`
+  - 解决主动监控时误触发呼入弹窗的问题
+
 ## v0.1.8
 
 - **修复 Coordinator 事件总线属性错误**
