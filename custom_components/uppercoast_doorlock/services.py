@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TOKEN
 from homeassistant.core import HomeAssistant, ServiceCall
 
 from .api import UpperCoastDoorlockClient
