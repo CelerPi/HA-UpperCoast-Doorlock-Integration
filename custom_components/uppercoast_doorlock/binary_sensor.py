@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import UpperCoastDoorlockCoordinator
 from .const import DOMAIN
@@ -11,7 +12,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from typing import Any, ClassVar
 
 
-class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
+class UpperCoastDoorlockBinarySensor(CoordinatorEntity, BinarySensorEntity):
     """表示当前是否有活跃呼叫。attributes 中附带当前门口机详情及设备列表。"""
 
     _attr_has_entity_name = True
@@ -21,7 +22,7 @@ class UpperCoastDoorlockBinarySensor(BinarySensorEntity):
     _attr_suggested_object_id: ClassVar[str] = "vds_call_status"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
-        self.coordinator = coordinator
+        super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
             name="VDS",

@@ -4,6 +4,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components.camera import Camera
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from typing import ClassVar
 
 from .coordinator import UpperCoastDoorlockCoordinator
@@ -11,7 +12,7 @@ from .const import DOMAIN
 from homeassistant.config_entries import ConfigEntry
 
 
-class UpperCoastDoorlockCamera(Camera):
+class UpperCoastDoorlockCamera(CoordinatorEntity, Camera):
     """实时视频帧摄像头实体。"""
 
     _attr_has_entity_name = True
@@ -20,8 +21,8 @@ class UpperCoastDoorlockCamera(Camera):
     _attr_suggested_object_id: ClassVar[str] = "vds_video"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
+        CoordinatorEntity.__init__(self, coordinator)
         Camera.__init__(self)
-        self.coordinator = coordinator
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
             name="VDS",
@@ -32,7 +33,8 @@ class UpperCoastDoorlockCamera(Camera):
     @property
     def is_on(self) -> bool:
         data = self.coordinator.data or {}
-        return bool(data.get("has_frame", False))
+        runtime = data.get("runtime", {})
+        return bool(runtime.get("has_frame", False))
 
     async def async_camera_image(self) -> bytes | None:
         try:

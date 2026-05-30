@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.components.button import ButtonEntity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from typing import ClassVar
 
 from .coordinator import UpperCoastDoorlockCoordinator
@@ -15,7 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 _LOGGER = logging.getLogger(__name__)
 
 
-class UpperCoastDoorlockButtonUnlock(ButtonEntity):
+class UpperCoastDoorlockButtonUnlock(CoordinatorEntity, ButtonEntity):
     """解锁按钮。"""
 
     _attr_has_entity_name = True
@@ -25,7 +26,7 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
     _attr_suggested_object_id: ClassVar[str] = "vds_button_unlock"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
-        self.coordinator = coordinator
+        super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
             name="VDS",
@@ -35,7 +36,8 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
 
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
-        target_ip = data.get("target_ip", "")
+        runtime = data.get("runtime", {})
+        target_ip = runtime.get("target_ip", "")
         if not target_ip:
             return
         try:
@@ -45,7 +47,7 @@ class UpperCoastDoorlockButtonUnlock(ButtonEntity):
             _LOGGER.error("解锁失败: %s", exc)
 
 
-class UpperCoastDoorlockButtonAnswer(ButtonEntity):
+class UpperCoastDoorlockButtonAnswer(CoordinatorEntity, ButtonEntity):
     """接听按钮。"""
 
     _attr_has_entity_name = True
@@ -55,7 +57,7 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
     _attr_suggested_object_id: ClassVar[str] = "vds_button_answer"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
-        self.coordinator = coordinator
+        super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
             name="VDS",
@@ -65,7 +67,8 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
 
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
-        target_ip = data.get("target_ip", "")
+        runtime = data.get("runtime", {})
+        target_ip = runtime.get("target_ip", "")
         if not target_ip:
             return
         try:
@@ -75,7 +78,7 @@ class UpperCoastDoorlockButtonAnswer(ButtonEntity):
             _LOGGER.error("接听失败: %s", exc)
 
 
-class UpperCoastDoorlockButtonHangup(ButtonEntity):
+class UpperCoastDoorlockButtonHangup(CoordinatorEntity, ButtonEntity):
     """挂断按钮。"""
 
     _attr_has_entity_name = True
@@ -85,7 +88,7 @@ class UpperCoastDoorlockButtonHangup(ButtonEntity):
     _attr_suggested_object_id: ClassVar[str] = "vds_button_hangup"
 
     def __init__(self, coordinator: UpperCoastDoorlockCoordinator) -> None:
-        self.coordinator = coordinator
+        super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, "doorlock")},
             name="VDS",
@@ -95,7 +98,8 @@ class UpperCoastDoorlockButtonHangup(ButtonEntity):
 
     async def async_press(self) -> None:
         data = self.coordinator.data or {}
-        target_ip = data.get("target_ip", "")
+        runtime = data.get("runtime", {})
+        target_ip = runtime.get("target_ip", "")
         if not target_ip:
             return
         try:
