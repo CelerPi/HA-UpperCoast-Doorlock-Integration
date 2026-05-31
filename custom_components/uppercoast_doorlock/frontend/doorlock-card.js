@@ -239,6 +239,14 @@ class DoorlockCard extends LitElement {
         background: rgba(52, 211, 153, 0.14);
         color: var(--vds-green);
       }
+      .main-btn.unlock .main-btn-icon {
+        background: rgba(52, 211, 153, 0.14);
+        color: var(--vds-green);
+      }
+      .main-btn.hangup .main-btn-icon {
+        background: rgba(251, 113, 133, 0.14);
+        color: var(--vds-red);
+      }
       .main-btn-copy {
         min-width: 0;
         text-align: left;
@@ -1562,6 +1570,27 @@ class DoorlockCard extends LitElement {
   }
 
   _renderMainButtons() {
+    if (this._callActive) {
+      return html`
+        <div class="main-buttons">
+          <button class="main-btn unlock" @click=${this._unlockDoor}>
+            <span class="main-btn-icon"><ha-icon icon="mdi:lock-open-outline"></ha-icon></span>
+            <span class="main-btn-copy">
+              <span class="main-btn-label">开锁</span>
+              <span class="main-btn-sub">打开当前门口机</span>
+            </span>
+          </button>
+          <button class="main-btn hangup" @click=${this._hangupCall}>
+            <span class="main-btn-icon"><ha-icon icon="mdi:phone-hangup"></ha-icon></span>
+            <span class="main-btn-copy">
+              <span class="main-btn-label">挂断</span>
+              <span class="main-btn-sub">${this._callAnswered ? '结束通话' : '拒绝呼叫'}</span>
+            </span>
+          </button>
+        </div>
+      `;
+    }
+
     return html`
       <div class="main-buttons">
         <button class="main-btn" @click=${() => { this._showIntercomPopup = true; }}>
@@ -1761,9 +1790,15 @@ class DoorlockCard extends LitElement {
             <button class="action-btn unlock" @click=${(e) => { e.stopPropagation(); this._unlockDoor(); }}>
               解锁
             </button>
-            <button class="action-btn answer" @click=${(e) => { e.stopPropagation(); this._answerCall(); }}>
-              接听
-            </button>
+            ${this._callAnswered
+              ? html`
+                <button class="action-btn hangup" @click=${(e) => { e.stopPropagation(); this._hangupCall(); }}>
+                  挂断
+                </button>`
+              : html`
+                <button class="action-btn answer" @click=${(e) => { e.stopPropagation(); this._answerCall(); }}>
+                  接听
+                </button>`}
           </div>
         </div>
       `;
