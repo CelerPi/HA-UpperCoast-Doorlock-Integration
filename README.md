@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.2.4-blue)
+![version](https://img.shields.io/badge/version-v0.2.5-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.2.4` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.2.5` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -110,7 +110,7 @@ entity: binary_sensor.vds_call_status
 camera_entity: camera.vds_video
 ```
 
-> 如果之前安装过独立的 Dashboard 卡片仓库，建议删除旧资源 `/local/HA-UpperCoast-DoorLock-Card.js`，只保留上面的 Integration 内置资源。旧资源如果先加载，会让浏览器继续使用旧版 `custom:doorlock-card`。
+> 集成会在 Home Assistant 默认的 storage 仪表盘模式下自动创建或更新这条资源；上面的 URL 主要用于排查或 YAML 模式手动配置。如果之前安装过独立的 Dashboard 卡片仓库，建议删除旧资源 `/local/HA-UpperCoast-DoorLock-Card.js`，避免旧资源先注册同名 `custom:doorlock-card`。
 
 ## 依赖
 

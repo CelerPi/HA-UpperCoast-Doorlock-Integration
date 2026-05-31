@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -12,7 +13,8 @@ import voluptuous as vol
 from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TOKEN
-from homeassistant.core import HomeAssistant
+from homeassistant.core import CoreState, EVENT_HOMEASSISTANT_STARTED, HomeAssistant
+from homeassistant.helpers.event import async_call_later
 from homeassistant.helpers.typing import ConfigType
 from aiohttp import web
 
@@ -25,6 +27,11 @@ _LOGGER = logging.getLogger(__name__)
 
 CARD_URL_PATH = f"/{DOMAIN}"
 CARD_STATIC_PATH = Path(__file__).parent / "frontend"
+MANIFEST_PATH = Path(__file__).parent / "manifest.json"
+with MANIFEST_PATH.open(encoding="utf-8") as manifest_file:
+    INTEGRATION_VERSION = json.load(manifest_file).get("version", "0.0.0")
+CARD_RESOURCE_PATH = f"{CARD_URL_PATH}/doorlock-card.js"
+CARD_RESOURCE_URL = f"{CARD_RESOURCE_PATH}?v={INTEGRATION_VERSION}"
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -46,16 +53,94 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     setup_services(hass)
     hass.http.register_view(UpperCoastDoorlockAudioView())
     hass.http.register_view(UpperCoastDoorlockWebsocketView())
-    await hass.http.async_register_static_paths(
-        [
-            StaticPathConfig(
-                CARD_URL_PATH,
-                str(CARD_STATIC_PATH),
-                cache_headers=True,
-            )
-        ]
-    )
+    await _async_register_static_path(hass)
+    await _async_schedule_lovelace_resource_registration(hass)
     return True
+
+
+async def _async_register_static_path(hass: HomeAssistant) -> None:
+    try:
+        await hass.http.async_register_static_paths(
+            [
+                StaticPathConfig(
+                    CARD_URL_PATH,
+                    str(CARD_STATIC_PATH),
+                    cache_headers=True,
+                )
+            ]
+        )
+    except RuntimeError:
+        _LOGGER.debug("Frontend static path already registered: %s", CARD_URL_PATH)
+
+
+async def _async_schedule_lovelace_resource_registration(hass: HomeAssistant) -> None:
+    async def _register(_event: Any = None) -> None:
+        await _async_register_lovelace_resource(hass)
+
+    if hass.state == CoreState.running:
+        await _register()
+    else:
+        hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _register)
+
+
+async def _async_register_lovelace_resource(hass: HomeAssistant) -> None:
+    async def _retry(_now: Any) -> None:
+        await _async_register_lovelace_resource(hass)
+
+    lovelace = hass.data.get("lovelace")
+    if not lovelace:
+        _LOGGER.debug("Lovelace data is not ready; retrying resource registration")
+        async_call_later(hass, 5, _retry)
+        return
+
+    if getattr(lovelace, "mode", None) != "storage":
+        _LOGGER.debug("Lovelace is not in storage mode; skipping automatic resource registration")
+        return
+
+    resources = getattr(lovelace, "resources", None)
+    if not resources:
+        _LOGGER.debug("Lovelace resources are not ready; retrying resource registration")
+        async_call_later(hass, 5, _retry)
+        return
+
+    if not getattr(resources, "loaded", False):
+        _LOGGER.debug("Lovelace resources are not loaded; retrying resource registration")
+        async_call_later(hass, 5, _retry)
+        return
+
+    existing = [
+        resource
+        for resource in resources.async_items()
+        if _resource_path(resource.get("url", "")) == CARD_RESOURCE_PATH
+    ]
+
+    if existing:
+        resource = existing[0]
+        if resource.get("url") != CARD_RESOURCE_URL:
+            await resources.async_update_item(
+                resource["id"],
+                {
+                    "res_type": "module",
+                    "url": CARD_RESOURCE_URL,
+                },
+            )
+            _LOGGER.info("Updated dashboard card resource to %s", CARD_RESOURCE_URL)
+        for duplicate in existing[1:]:
+            await resources.async_delete_item(duplicate["id"])
+            _LOGGER.info("Removed duplicate dashboard card resource %s", duplicate.get("url"))
+        return
+
+    await resources.async_create_item(
+        {
+            "res_type": "module",
+            "url": CARD_RESOURCE_URL,
+        }
+    )
+    _LOGGER.info("Registered dashboard card resource %s", CARD_RESOURCE_URL)
+
+
+def _resource_path(url: str) -> str:
+    return url.split("?", 1)[0]
 
 
 def _get_entry_data(hass: HomeAssistant) -> dict[str, Any] | None:
