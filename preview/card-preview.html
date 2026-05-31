@@ -226,7 +226,250 @@
     window.customCards = [];
   </script>
   <script type="module">
-    import "../custom_components/uppercoast_doorlock/frontend/doorlock-card.js";
+    function defineFallbackCard() {
+      if (customElements.get("doorlock-card")) return;
+
+      class DoorlockCardFallback extends HTMLElement {
+        constructor() {
+          super();
+          this.attachShadow({ mode: "open" });
+          this._config = {};
+          this._callAnswered = false;
+        }
+
+        setConfig(config) {
+          this._config = config || {};
+        }
+
+        set hass(hass) {
+          this._hass = hass;
+          this._render();
+        }
+
+        requestUpdate() {
+          this._render();
+        }
+
+        _render() {
+          const entity = this._hass?.states?.[this._config.entity || "binary_sensor.vds_call_status"];
+          const attributes = entity?.attributes || {};
+          const isCall = entity?.state === "on";
+          const connected = attributes.connection_status !== "disconnected";
+          const statusText = isCall ? (this._callAnswered ? "通话中" : "呼叫中") : (connected ? "在线" : "离线");
+          const statusClass = isCall ? (this._callAnswered ? "answered" : "active") : (connected ? "online" : "offline");
+          const activeText = isCall ? (attributes.display_name || "呼叫中") : "无活动呼叫";
+          const count = attributes.device_count || attributes.devices?.length || 0;
+          const iconUrl = "../custom_components/uppercoast_doorlock/frontend/assets/icon.png";
+
+          this.shadowRoot.innerHTML = `
+            <style>
+              :host {
+                display: block;
+                font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+                --vds-border: rgba(255, 255, 255, 0.11);
+                --vds-border-hover: rgba(255, 255, 255, 0.2);
+                --vds-text-primary: rgba(255, 255, 255, 0.94);
+                --vds-text-secondary: rgba(226, 232, 240, 0.66);
+                --vds-text-tertiary: rgba(203, 213, 225, 0.42);
+                --vds-blue: #38BDF8;
+                --vds-green: #34D399;
+                --vds-red: #FB7185;
+                --vds-orange: #FBBF24;
+              }
+              .card {
+                background:
+                  radial-gradient(circle at 14% 0%, rgba(52, 211, 153, 0.18), transparent 32%),
+                  linear-gradient(150deg, rgba(16, 23, 42, 0.96), rgba(11, 16, 31, 0.88));
+                border: 1px solid var(--vds-border);
+                border-radius: 18px;
+                overflow: hidden;
+                color: var(--vds-text-primary);
+                box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+              }
+              .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 14px;
+                padding: 16px 18px 12px;
+                border-bottom: 1px solid var(--vds-border);
+              }
+              .card-title {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 0;
+              }
+              .card-title-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 11px;
+                overflow: hidden;
+                background: linear-gradient(135deg, #34D399, #22C55E);
+                box-shadow: 0 10px 24px rgba(34, 197, 94, 0.26);
+                flex: 0 0 auto;
+              }
+              .card-title-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+              }
+              .card-title-text {
+                font-size: 16px;
+                font-weight: 700;
+                white-space: nowrap;
+              }
+              .card-title-sub {
+                margin-top: 2px;
+                font-size: 12px;
+                color: var(--vds-text-secondary);
+              }
+              .status-badge {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 11px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 650;
+                background: rgba(148, 163, 184, 0.12);
+                border: 1px solid var(--vds-border);
+                color: var(--vds-text-secondary);
+                white-space: nowrap;
+              }
+              .status-badge.active {
+                background: rgba(251, 113, 133, 0.14);
+                border-color: rgba(251, 113, 133, 0.28);
+                color: var(--vds-red);
+              }
+              .status-badge.online,
+              .status-badge.answered {
+                background: rgba(52, 211, 153, 0.14);
+                border-color: rgba(52, 211, 153, 0.28);
+                color: var(--vds-green);
+              }
+              .status-badge.offline {
+                background: rgba(251, 191, 36, 0.14);
+                border-color: rgba(251, 191, 36, 0.28);
+                color: var(--vds-orange);
+              }
+              .status-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: currentColor;
+              }
+              .main-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                padding: 14px 16px 16px;
+              }
+              .main-btn {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 62px;
+                padding: 13px 12px;
+                border: 1px solid var(--vds-border);
+                border-radius: 14px;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.045));
+                color: var(--vds-text-primary);
+              }
+              .main-btn-icon {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+                display: grid;
+                place-items: center;
+                flex: 0 0 auto;
+                background: rgba(56, 189, 248, 0.14);
+                color: var(--vds-blue);
+                font-size: 18px;
+              }
+              .main-btn.monitor .main-btn-icon {
+                background: rgba(52, 211, 153, 0.14);
+                color: var(--vds-green);
+              }
+              .main-btn-label {
+                display: block;
+                font-size: 15px;
+                font-weight: 700;
+                line-height: 1.15;
+              }
+              .main-btn-sub {
+                display: block;
+                margin-top: 3px;
+                font-size: 11px;
+                color: var(--vds-text-tertiary);
+                line-height: 1.2;
+              }
+              .card-footer {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 0 18px 15px;
+                color: var(--vds-text-tertiary);
+                font-size: 11px;
+              }
+              .card-footer span {
+                white-space: nowrap;
+              }
+              .card-footer strong {
+                color: var(--vds-text-secondary);
+                font-weight: 650;
+              }
+            </style>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon"><img src="${iconUrl}" alt=""></div>
+                  <div>
+                    <div class="card-title-text">云海湾门禁</div>
+                    <div class="card-title-sub">${attributes.building_name || "1栋A座"}</div>
+                  </div>
+                </div>
+                <div class="status-badge ${statusClass}">
+                  <div class="status-dot"></div>${statusText}
+                </div>
+              </div>
+              <div class="main-buttons">
+                <div class="main-btn">
+                  <span class="main-btn-icon">☎</span>
+                  <span>
+                    <span class="main-btn-label">对讲</span>
+                    <span class="main-btn-sub">拨号与通话</span>
+                  </span>
+                </div>
+                <div class="main-btn monitor">
+                  <span class="main-btn-icon">▣</span>
+                  <span>
+                    <span class="main-btn-label">监控</span>
+                    <span class="main-btn-sub">查看门口机</span>
+                  </span>
+                </div>
+              </div>
+              <div class="card-footer">
+                <span>门口机 <strong>${count ? `${count} 台` : "—"}</strong></span>
+                <span>${connected ? "后端已连接" : "后端未连接"} · ${activeText}</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      customElements.define("doorlock-card", DoorlockCardFallback);
+    }
+
+    async function loadDoorlockCard() {
+      try {
+        await import("../custom_components/uppercoast_doorlock/frontend/doorlock-card.js");
+      } catch (error) {
+        console.warn("[preview] 真实卡片模块加载失败，使用本地预览兜底。", error);
+        defineFallbackCard();
+      }
+    }
 
     const devices = Array.from({ length: 8 }, (_, index) => {
       const no = String(index + 1).padStart(2, "0");
@@ -320,6 +563,7 @@
       card.requestUpdate();
     }
 
+    await loadDoorlockCard();
     await customElements.whenDefined("doorlock-card");
 
     const mainCard = document.querySelector("#main-card");
