@@ -1814,7 +1814,7 @@ class DoorlockCard extends LitElement {
     // 全屏弹窗模式
     return html`
       <div class="popup-overlay" @click=${(e) => { if (e.target === e.currentTarget) this._dismissCallPopup(); }}>
-        <div class="popup">
+        <div class="popup call-popup">
           <div class="popup-header ${headerClass}">
             <div class="popup-header-info">
               <div class="popup-calling-icon ${iconClass}">${this._callAnswered ? '通话' : '呼入'}</div>
