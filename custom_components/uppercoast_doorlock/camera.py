@@ -36,7 +36,11 @@ class UpperCoastDoorlockCamera(CoordinatorEntity, Camera):
         runtime = data.get("runtime", {})
         return bool(runtime.get("has_frame", False))
 
-    async def async_camera_image(self) -> bytes | None:
+    async def async_camera_image(
+        self,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> bytes | None:
         try:
             client = self.coordinator.client
             return await client.async_get_frame()

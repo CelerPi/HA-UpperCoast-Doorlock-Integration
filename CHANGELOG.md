@@ -1,5 +1,11 @@
 # 更新日志
 
+## v0.2.6
+
+- **兼容新版 Home Assistant Camera API**
+  - `UpperCoastDoorlockCamera.async_camera_image()` 新增 `width` / `height` 参数
+  - 修复 HA 请求摄像头截图时报 `unexpected keyword argument 'width'`
+
 ## v0.2.5
 
 - **自动注册 Dashboard 卡片资源**
