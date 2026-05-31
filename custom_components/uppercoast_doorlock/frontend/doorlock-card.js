@@ -624,6 +624,9 @@ class DoorlockCard extends LitElement {
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255,255,255,0.08);
         animation: popupIn 0.35s cubic-bezier(0.32, 0.72, 0, 1);
       }
+      .popup.call-popup {
+        max-width: min(640px, calc(100vw - 40px));
+      }
       @keyframes popupIn {
         from { opacity: 0; transform: scale(0.92) translateY(10px); }
         to { opacity: 1; transform: scale(1) translateY(0); }
@@ -721,8 +724,11 @@ class DoorlockCard extends LitElement {
       .video-frame img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: block;
+      }
+      .call-popup .video-frame {
+        aspect-ratio: 4 / 3;
       }
       .video-overlay {
         position: absolute;
@@ -1637,7 +1643,7 @@ class DoorlockCard extends LitElement {
 
     return html`
       <div class="popup-overlay" @click=${(e) => { if (e.target === e.currentTarget) this._showIntercomPopup = false; }}>
-        <div class="popup">
+        <div class="popup call-popup">
           <div class="popup-header intercom">
             <div class="popup-header-info">
               <div class="popup-calling-icon" style="animation:none;background:rgba(96,165,250,0.2);color:var(--vds-blue);">对讲</div>
