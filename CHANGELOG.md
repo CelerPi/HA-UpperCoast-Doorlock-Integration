@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.2.1
+
+- **修复 HACS 列表图标不显示**
+  - 在仓库根目录新增 `brand/icon.png` 和 `brand/logo.png`
+  - 保留 `custom_components/uppercoast_doorlock/brand/`，同时兼容 Home Assistant 本地品牌图
+  - 更新 `manifest.json` 版本至 `0.2.1`
+
 ## v0.2.0
 
 - **内置 Dashboard 卡片**

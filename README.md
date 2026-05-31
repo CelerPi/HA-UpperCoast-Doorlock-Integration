@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.2.0-blue)
+![version](https://img.shields.io/badge/version-v0.2.1-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -68,6 +68,11 @@ custom_components/uppercoast_doorlock/
     └── zh.json
 blueprints/automation/
 └── mobile_call_notification.yaml
+brand/
+├── icon.png
+├── icon@2x.png
+├── logo.png
+└── logo@2x.png
 ```
 
 ## 配置
