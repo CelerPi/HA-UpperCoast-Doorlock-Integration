@@ -827,7 +827,7 @@ class DoorlockCard extends LitElement {
         -webkit-backdrop-filter: blur(40px) saturate(180%);
         box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
         z-index: 9000;
-        cursor: pointer;
+        cursor: default;
         animation: pipIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
         transition: transform 0.2s ease;
       }
@@ -896,6 +896,7 @@ class DoorlockCard extends LitElement {
         background: #000;
         position: relative;
         overflow: hidden;
+        cursor: zoom-in;
       }
       .call-pip-video img {
         width: 100%;
@@ -1775,13 +1776,13 @@ class DoorlockCard extends LitElement {
     // 小窗模式（右下角画中画）
     if (this._callMinimized) {
       return html`
-        <div class="call-pip" @click=${this._expandCallPopup}>
+        <div class="call-pip">
           <div class="call-pip-header">
             <span class="call-pip-badge ${iconClass}">${labelText}</span>
             <span class="call-pip-name">${this._displayName}</span>
             <button class="call-pip-close" @click=${(e) => { e.stopPropagation(); this._dismissCallPopup(); }}>×</button>
           </div>
-          <div class="call-pip-video">
+          <div class="call-pip-video" @click=${this._expandCallPopup} title="点击放大">
             ${this._cameraUrl
               ? html`<img src="${this._cameraUrl}" alt="门禁视频" />`
               : html`<div class="call-pip-placeholder">加载中...</div>`}
