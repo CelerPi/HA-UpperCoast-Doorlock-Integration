@@ -13,6 +13,8 @@ _LOGGER = logging.getLogger(__name__)
 
 def setup_services(hass: HomeAssistant) -> None:
     """注册门禁服务调用。"""
+    if hass.services.has_service(DOMAIN, "unlock"):
+        return
 
     async def async_call_unlock(service: ServiceCall) -> None:
         entry_data = _get_entry_data(hass)

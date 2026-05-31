@@ -1,10 +1,10 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.1.9-blue)
+![version](https://img.shields.io/badge/version-v0.2.0-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
-云海湾虚拟门禁系统的 Home Assistant 自定义集成（Custom Integration），为 Addon 提供实体封装和前端交互能力。
+云海湾虚拟门禁系统的 Home Assistant 自定义集成（Custom Integration），为 Addon 提供实体封装，并内置 Dashboard 卡片资源。
 
 ## 功能
 
@@ -18,6 +18,9 @@
 - 通过 DataUpdateCoordinator 每秒轮询 Addon 状态
 - 在 HA 事件总线上派发呼叫事件（`uppercoast_doorlock_call_started` / `call_ended` / `frame_received`）
 - 提供 Service：`unlock`、`answer`、`hangup`、`monitor_start`、`monitor_stop`、`send_audio`
+- 内置 Dashboard 卡片：`custom:doorlock-card`
+- 提供 WebSocket 代理：`/api/uppercoast_doorlock/ws`，用于实时视频帧和音频数据
+- 提供手机来电通知蓝图：`blueprints/automation/mobile_call_notification.yaml`
 
 ## 安装
 
@@ -36,6 +39,37 @@
 2. 将其复制到 Home Assistant 的 `config/custom_components/` 目录下
 3. 重启 Home Assistant
 
+## 目录结构
+
+本仓库按 Home Assistant 自定义集成和 HACS 集成仓库结构组织：
+
+```text
+custom_components/uppercoast_doorlock/
+├── __init__.py
+├── manifest.json
+├── config_flow.py
+├── coordinator.py
+├── api.py
+├── binary_sensor.py
+├── camera.py
+├── button.py
+├── services.py
+├── services.yaml
+├── brand/
+│   ├── icon.png
+│   ├── icon@2x.png
+│   ├── logo.png
+│   └── logo@2x.png
+├── frontend/
+│   ├── doorlock-card.js
+│   └── assets/icon.png
+└── translations/
+    ├── en.json
+    └── zh.json
+blueprints/automation/
+└── mobile_call_notification.yaml
+```
+
 ## 配置
 
 重启后，进入 **设置 → 设备与服务 → 添加集成**，搜索「虚拟门禁系统」或「uppercoast」：
@@ -48,11 +82,33 @@
 
 > 配置前请确保 Addon 已启动（日志显示「监听中」）。
 
+## Dashboard 卡片
+
+本集成已内置 Dashboard 卡片文件。安装并重启 Home Assistant 后，在 **设置 → 仪表盘 → 资源** 中添加：
+
+| 参数 | 值 |
+|------|----|
+| URL | `/uppercoast_doorlock/doorlock-card.js` |
+| 资源类型 | `JavaScript Module` |
+
+添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
+
+```yaml
+type: custom:doorlock-card
+```
+
+如你的实体 ID 不是默认值，可以指定：
+
+```yaml
+type: custom:doorlock-card
+entity: binary_sensor.vds_call_status
+camera_entity: camera.vds_video
+```
+
 ## 依赖
 
 - Home Assistant 2026.5.0 或更高版本
 - **[uppercoast_doorlock Addon](https://github.com/CelerPi/HA_Virtual_Doorlock_System_App)** 已安装并运行
-- **[云海湾门禁卡片](https://github.com/CelerPi/HA-UpperCoast-Doorlock-Card)**（可选，用于 Dashboard 弹窗和监控界面）
 
 ## 故障排查
 
@@ -74,7 +130,6 @@
 |------|------|
 | [HA-UpperCoast-Doorlock-Integration](https://github.com/CelerPi/HA-UpperCoast-Doorlock-Integration) | 本仓库，集成源码 |
 | [HA_Virtual_Doorlock_System_App](https://github.com/CelerPi/HA_Virtual_Doorlock_System_App) | Addon 源码 |
-| [HA-UpperCoast-Doorlock-Card](https://github.com/CelerPi/HA-UpperCoast-Doorlock-Card) | Dashboard 卡片源码 |
 
 ## License
 

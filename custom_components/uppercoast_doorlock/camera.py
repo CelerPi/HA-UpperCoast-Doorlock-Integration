@@ -38,7 +38,7 @@ class UpperCoastDoorlockCamera(CoordinatorEntity, Camera):
 
     async def async_camera_image(self) -> bytes | None:
         try:
-            client = self.coordinator._client
+            client = self.coordinator.client
             return await client.async_get_frame()
         except Exception:
             return None

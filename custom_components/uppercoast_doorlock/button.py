@@ -41,7 +41,7 @@ class UpperCoastDoorlockButtonUnlock(CoordinatorEntity, ButtonEntity):
         if not target_ip:
             return
         try:
-            client = self.coordinator._client
+            client = self.coordinator.client
             await client.async_unlock(target_ip)
         except Exception as exc:
             _LOGGER.error("解锁失败: %s", exc)
@@ -72,7 +72,7 @@ class UpperCoastDoorlockButtonAnswer(CoordinatorEntity, ButtonEntity):
         if not target_ip:
             return
         try:
-            client = self.coordinator._client
+            client = self.coordinator.client
             await client.async_answer(target_ip)
         except Exception as exc:
             _LOGGER.error("接听失败: %s", exc)
@@ -103,7 +103,7 @@ class UpperCoastDoorlockButtonHangup(CoordinatorEntity, ButtonEntity):
         if not target_ip:
             return
         try:
-            client = self.coordinator._client
+            client = self.coordinator.client
             await client.async_hangup(target_ip)
         except Exception as exc:
             _LOGGER.error("挂断失败: %s", exc)

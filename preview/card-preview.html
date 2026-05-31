@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>云海湾门禁卡片预览</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page-bg: #070b16;
+      --vds-surface: rgba(14, 18, 32, 0.86);
+      --vds-surface-strong: rgba(19, 25, 43, 0.94);
+      --vds-glass: rgba(255, 255, 255, 0.07);
+      --vds-glass-hover: rgba(255, 255, 255, 0.11);
+      --vds-border: rgba(255, 255, 255, 0.11);
+      --vds-border-hover: rgba(255, 255, 255, 0.2);
+      --vds-text-primary: rgba(255, 255, 255, 0.94);
+      --vds-text-secondary: rgba(226, 232, 240, 0.66);
+      --vds-text-tertiary: rgba(203, 213, 225, 0.42);
+      --vds-blue: #38BDF8;
+      --vds-green: #34D399;
+      --vds-red: #FB7185;
+      --vds-orange: #FBBF24;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      color: var(--vds-text-primary);
+      background:
+        radial-gradient(circle at 16% 18%, rgba(79, 70, 229, 0.42), transparent 30%),
+        radial-gradient(circle at 84% 66%, rgba(14, 165, 233, 0.36), transparent 34%),
+        linear-gradient(135deg, #050816, #101827 48%, #020617);
+    }
+
+    .page {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 44px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--vds-text-secondary);
+      font-size: 14px;
+    }
+
+    .state-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 4px;
+      border: 1px solid var(--vds-border);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .state-tabs button {
+      appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 9px 13px;
+      background: transparent;
+      color: var(--vds-text-secondary);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .state-tabs button.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--vds-text-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px) 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .phone-surface {
+      padding: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      background:
+        linear-gradient(150deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.32)),
+        rgba(255, 255, 255, 0.04);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    .card {
+      position: relative;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(52, 211, 153, 0.18), transparent 32%),
+        linear-gradient(150deg, rgba(16, 23, 42, 0.96), rgba(11, 16, 31, 0.88));
+      backdrop-filter: blur(28px) saturate(150%);
+      border: 1px solid var(--vds-border);
+      border-radius: 18px;
+      overflow: hidden;
+      color: var(--vds-text-primary);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--vds-border);
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .card-title-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #34D399, #22C55E);
+      border-radius: 11px;
+      position: relative;
+      overflow: hidden;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(6, 20, 14, 0.9);
+      box-shadow: 0 10px 24px rgba(34, 197, 94, 0.26);
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .card-title-icon img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 11px;
+    }
+
+    .card-title-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--vds-text-primary);
+      white-space: nowrap;
+    }
+
+    .card-title-sub {
+      font-size: 12px;
+      color: var(--vds-text-secondary);
+      margin-top: 2px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid var(--vds-border);
+      color: var(--vds-text-secondary);
+      white-space: nowrap;
+    }
+
+    .status-badge.active {
+      background: rgba(251, 113, 133, 0.14);
+      border-color: rgba(251, 113, 133, 0.28);
+      color: var(--vds-red);
+    }
+
+    .status-badge.online,
+    .status-badge.answered {
+      background: rgba(52, 211, 153, 0.14);
+      border-color: rgba(52, 211, 153, 0.28);
+      color: var(--vds-green);
+    }
+
+    .status-badge.offline {
+      background: rgba(251, 191, 36, 0.14);
+      border-color: rgba(251, 191, 36, 0.28);
+      color: var(--vds-orange);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--vds-text-tertiary);
+    }
+
+    .status-badge.active .status-dot {
+      background: var(--vds-red);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .status-badge.online .status-dot,
+    .status-badge.answered .status-dot { background: var(--vds-green); }
+    .status-badge.offline .status-dot { background: var(--vds-orange); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .main-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 14px 16px 16px;
+    }
+
+    .main-btn {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      min-width: 0;
+      min-height: 62px;
+      padding: 13px 12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.045));
+      border: 1px solid var(--vds-border);
+      border-radius: 14px;
+      color: var(--vds-text-primary);
+    }
+
+    .main-btn-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(56, 189, 248, 0.14);
+      color: var(--vds-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .main-btn.monitor .main-btn-icon {
+      background: rgba(52, 211, 153, 0.14);
+      color: var(--vds-green);
+    }
+
+    .main-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+    }
+
+    .main-btn-copy {
+      min-width: 0;
+      text-align: left;
+    }
+
+    .main-btn-label {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .main-btn-sub {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--vds-text-tertiary);
+      line-height: 1.2;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 18px 15px;
+      color: var(--vds-text-tertiary);
+      font-size: 11px;
+    }
+
+    .card-footer span {
+      display: inline-flex;
+      align-items: center;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .card-footer strong {
+      color: var(--vds-text-secondary);
+      font-weight: 650;
+      margin-left: 4px;
+    }
+
+    .side-panel {
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 22px;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .variant-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .mini-card-label {
+      margin: 0 0 8px;
+      color: var(--vds-text-secondary);
+      font-size: 12px;
+    }
+
+    .spec-list {
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--vds-text-secondary);
+      font-size: 13px;
+      line-height: 1.9;
+    }
+
+    @media (max-width: 860px) {
+      .topbar {
+        align-items: start;
+        flex-direction: column;
+      }
+      .preview-grid {
+        grid-template-columns: 1fr;
+      }
+      .variant-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .page {
+        width: min(100vw - 20px, 1180px);
+        padding-top: 22px;
+      }
+      .phone-surface {
+        padding: 12px;
+      }
+      .card-header {
+        padding: 14px 14px 10px;
+      }
+      .main-buttons {
+        padding: 12px 12px 14px;
+      }
+      .main-btn {
+        padding: 12px 10px;
+      }
+      .main-btn-sub {
+        display: none;
+      }
+      .card-footer {
+        padding: 0 14px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <div>
+        <h1>云海湾门禁卡片预览</h1>
+        <div class="subtitle">静态页面，只用于查看 UI；真实卡片代码仍在集成里。</div>
+      </div>
+      <div class="state-tabs" aria-label="切换状态">
+        <button class="active" data-state="idle">在线</button>
+        <button data-state="ringing">呼叫中</button>
+        <button data-state="answered">通话中</button>
+        <button data-state="offline">离线</button>
+      </div>
+    </div>
+
+    <div class="preview-grid">
+      <section class="phone-surface">
+        <article class="card" id="main-card"></article>
+      </section>
+
+      <aside class="side-panel">
+        <div class="panel-title">其他状态预览</div>
+        <div class="variant-row">
+          <div>
+            <p class="mini-card-label">呼叫中</p>
+            <article class="card" data-static-state="ringing"></article>
+          </div>
+          <div>
+            <p class="mini-card-label">通话中</p>
+            <article class="card" data-static-state="answered"></article>
+          </div>
+        </div>
+        <ul class="spec-list">
+          <li>资源路径：<code>/uppercoast_doorlock/doorlock-card.js</code></li>
+          <li>视觉同步：主卡片布局、颜色、圆角、阴影与当前 JS 版本一致。</li>
+          <li>查看方式：直接双击这个 HTML，或用浏览器打开本地文件。</li>
+        </ul>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const iconUrl = "../custom_components/uppercoast_doorlock/frontend/assets/icon.png";
+    const states = {
+      idle: {
+        status: "在线",
+        statusClass: "online",
+        building: "1栋A座",
+        footer: "无活动呼叫",
+        connection: "后端已连接",
+        count: "8",
+      },
+      ringing: {
+        status: "呼叫中",
+        statusClass: "active",
+        building: "1栋A座",
+        footer: "2号机",
+        connection: "后端已连接",
+        count: "8",
+      },
+      answered: {
+        status: "通话中",
+        statusClass: "answered",
+        building: "1栋A座",
+        footer: "2号机",
+        connection: "后端已连接",
+        count: "8",
+      },
+      offline: {
+        status: "离线",
+        statusClass: "offline",
+        building: "1栋A座",
+        footer: "无活动呼叫",
+        connection: "后端未连接",
+        count: "8",
+      },
+    };
+
+    function iconSvg(type) {
+      if (type === "monitor") {
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16v10H4z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`;
+      }
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>`;
+    }
+
+    function renderCard(el, stateName) {
+      const state = states[stateName];
+      el.innerHTML = `
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <img src="${iconUrl}" alt="">
+              <span>门禁</span>
+            </div>
+            <div>
+              <div class="card-title-text">云海湾门禁</div>
+              <div class="card-title-sub">${state.building}</div>
+            </div>
+          </div>
+          <div class="status-badge ${state.statusClass}">
+            <div class="status-dot"></div>
+            ${state.status}
+          </div>
+        </div>
+
+        <div class="main-buttons">
+          <div class="main-btn">
+            <span class="main-btn-icon">${iconSvg("phone")}</span>
+            <span class="main-btn-copy">
+              <span class="main-btn-label">对讲</span>
+              <span class="main-btn-sub">拨号与通话</span>
+            </span>
+          </div>
+          <div class="main-btn monitor">
+            <span class="main-btn-icon">${iconSvg("monitor")}</span>
+            <span class="main-btn-copy">
+              <span class="main-btn-label">监控</span>
+              <span class="main-btn-sub">查看门口机</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span>门口机 <strong>${state.count} 台</strong></span>
+          <span>${state.connection} · ${state.footer}</span>
+        </div>
+      `;
+    }
+
+    const mainCard = document.querySelector("#main-card");
+    renderCard(mainCard, "idle");
+    document.querySelectorAll("[data-static-state]").forEach((el) => {
+      renderCard(el, el.dataset.staticState);
+    });
+
+    document.querySelectorAll(".state-tabs button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".state-tabs button").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        renderCard(mainCard, button.dataset.state);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,24 @@
 # 更新日志
 
+## v0.2.0
+
+- **内置 Dashboard 卡片**
+  - 将卡片资源整合进 Integration，安装集成后通过 `/uppercoast_doorlock/doorlock-card.js` 加载
+  - 新增 `frontend/` 目录和卡片静态预览页，便于脱离 HA 调整 UI
+- **新增 WebSocket 实时通道代理**
+  - 新增 `/api/uppercoast_doorlock/ws`，由 HA 鉴权后代理 Addon WebSocket
+  - 卡片优先通过 WebSocket 接收实时视频帧和音频数据，失败时回退 HTTP 轮询
+- **移动端来电通知蓝图**
+  - 新增 `blueprints/automation/mobile_call_notification.yaml`
+  - 支持 iOS / Android Home Assistant App 来电推送、打开画面、解锁和挂断动作
+- **配置与生命周期优化**
+  - API client 改用 HA 共享 aiohttp session
+  - 服务和 HTTP view 改为集成初始化时注册，避免重载重复注册
+  - Options Flow 支持修改 Host / Port / Token 后自动重载
+- **品牌与目录结构整理**
+  - 按 HA 2026.3+ 本地品牌图结构整理 `brand/`
+  - 更新 `manifest.json` 版本至 `0.2.0`，补充 `iot_class`
+
 ## v0.1.9
 
 - **`binary_sensor` 区分呼叫与监控状态**

@@ -47,7 +47,7 @@ class UpperCoastDoorlockBinarySensor(CoordinatorEntity, BinarySensorEntity):
         connection_error = data.get("connection_error", "")
 
         client = getattr(self.coordinator, "_client", None)
-        api_url = getattr(client, "_base_url", "") if client else ""
+        api_url = getattr(client, "base_url", "") if client else ""
 
         attrs: dict[str, Any] = {
             "building_id": config.get("building_id", ""),

@@ -3,6 +3,7 @@ from __future__ import annotations
 import aiohttp
 import voluptuous as vol
 from homeassistant.config_entries import (
+    ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
     OptionsFlow,
@@ -23,12 +24,20 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 class UpperCoastDoorlockConfigFlow(ConfigFlow, domain=DOMAIN):
     version = 1
 
+    @staticmethod
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        return UpperCoastDoorlockOptionsFlow(config_entry)
+
     async def async_step_user(
         self, user_input: dict[str, str] | None = None
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
 
         if user_input is not None:
+            await self.async_set_unique_id(
+                f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}"
+            )
+            self._abort_if_unique_id_configured()
             if not await self._async_check_connection(user_input):
                 errors["base"] = "cannot_connect"
             else:
@@ -68,6 +77,7 @@ class UpperCoastDoorlockOptionsFlow(OptionsFlow):
     async def async_step_init(self, user_input: dict[str, str] | None = None) -> ConfigFlowResult:
         if user_input is not None:
             self.hass.config_entries.async_update_entry(self._config_entry, data=user_input)
+            await self.hass.config_entries.async_reload(self._config_entry.entry_id)
             return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(

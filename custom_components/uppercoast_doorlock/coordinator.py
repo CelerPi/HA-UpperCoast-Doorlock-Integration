@@ -26,6 +26,10 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
         self._previous: dict[str, Any] = {}
         self._consecutive_errors = 0
 
+    @property
+    def client(self) -> UpperCoastDoorlockClient:
+        return self._client
+
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             status = await self._client.async_get_status()
@@ -36,7 +40,7 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
             if self._consecutive_errors <= 3 or self._consecutive_errors % 60 == 0:
                 _LOGGER.error(
                     "无法连接到门禁 Addon (%s): %s",
-                    self._client._base_url,
+                    self._client.base_url,
                     exc,
                 )
             return {
@@ -52,7 +56,7 @@ class UpperCoastDoorlockCoordinator(DataUpdateCoordinator):
         if not devices:
             _LOGGER.warning(
                 "Addon (%s) 返回的门口机列表为空，请检查 Addon 的 building_id 配置",
-                self._client._base_url,
+                self._client.base_url,
             )
 
         self._detect_and_publish_events(runtime)
