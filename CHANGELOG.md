@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.2.2
+
+- **修复静态预览页与真实卡片不一致**
+  - 预览页改为直接加载真实 `doorlock-card.js`
+  - 使用 mock Home Assistant 实体状态驱动同一个 `custom:doorlock-card`
+  - 避免预览页和实际卡片各写一套 UI 导致视觉漂移
+
 ## v0.2.1
 
 - **修复 HACS 列表图标不显示**

@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.2.1-blue)
+![version](https://img.shields.io/badge/version-v0.2.2-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -10,7 +10,7 @@
 
 - 与 `uppercoast_doorlock` Addon 通信，同步呼叫状态和设备信息
 - 提供以下 Home Assistant 实体：
-  - `binary_sensor.vds_call_status` — 呼叫状态（待机 / 呼叫中）
+  - `binary_sensor.vds_call_status` — 呼叫状态（空闲 / 呼叫中）
   - `camera.vds_video` — 实时视频画面
   - `button.vds_button_unlock` — 远程解锁
   - `button.vds_button_answer` — 接听呼叫
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.2.2` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -109,6 +109,8 @@ type: custom:doorlock-card
 entity: binary_sensor.vds_call_status
 camera_entity: camera.vds_video
 ```
+
+> 如果之前安装过独立的 Dashboard 卡片仓库，建议删除旧资源 `/local/HA-UpperCoast-DoorLock-Card.js`，只保留上面的 Integration 内置资源。旧资源如果先加载，会让浏览器继续使用旧版 `custom:doorlock-card`。
 
 ## 依赖
 
