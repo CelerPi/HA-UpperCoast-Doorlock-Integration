@@ -1,6 +1,6 @@
 {
+  "title": "Virtual Door Lock System",
   "config": {
-    "title": "Virtual Door Lock System",
     "step": {
       "user": {
         "title": "Virtual Door Lock System",
@@ -25,7 +25,6 @@
     }
   },
   "options": {
-    "title": "Virtual Door Lock System",
     "step": {
       "init": {
         "title": "Virtual Door Lock System",

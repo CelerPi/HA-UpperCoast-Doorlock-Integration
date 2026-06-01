@@ -1,6 +1,6 @@
 {
+  "title": "虚拟门禁系统",
   "config": {
-    "title": "虚拟门禁系统",
     "step": {
       "user": {
         "title": "虚拟门禁系统",
@@ -25,7 +25,6 @@
     }
   },
   "options": {
-    "title": "虚拟门禁系统",
     "step": {
       "init": {
         "title": "虚拟门禁系统",
