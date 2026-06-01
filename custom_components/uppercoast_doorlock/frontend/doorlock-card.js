@@ -765,8 +765,13 @@ class DoorlockCard extends LitElement {
       .popup-actions.two-btn {
         gap: 12px;
       }
+      .popup-actions.three-btn {
+        display: grid;
+        grid-template-columns: 1.15fr 1fr 1fr;
+      }
       .action-btn {
         flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1005,29 +1010,79 @@ class DoorlockCard extends LitElement {
       @media (max-width: 600px) {
         .popup-overlay,
         .monitor-popup {
-          align-items: stretch;
-          justify-content: flex-end;
-          padding: 12px;
+          align-items: center;
+          justify-content: center;
+          padding: 8px;
+          min-height: 100dvh;
         }
         .popup.call-popup,
         .monitor-popup-content {
           max-width: none;
           width: 100%;
-          border-radius: 22px;
+          border-radius: 24px;
+        }
+        .popup.call-popup {
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100dvh - 16px);
+          overflow: hidden;
         }
         .popup-header,
         .monitor-header {
-          padding: 14px 16px;
+          padding: 14px 16px 12px;
+          flex: 0 0 auto;
+        }
+        .popup-header-info {
+          min-width: 0;
+        }
+        .popup-calling-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 13px;
+          font-size: 13px;
+        }
+        .popup-calling-label {
+          font-size: 12px;
+        }
+        .popup-device-name {
+          font-size: 18px;
+          max-width: calc(100vw - 150px);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .popup-device-location {
+          font-size: 13px;
+          color: var(--vds-text-secondary);
+        }
+        .popup-close {
+          width: 38px;
+          height: 38px;
+          font-size: 18px;
+        }
+        .call-popup .video-frame {
+          flex: 0 0 auto;
+          min-height: 0;
+          aspect-ratio: 4 / 3;
+        }
+        .call-popup .video-frame img {
+          object-fit: contain;
         }
         .popup-actions,
         .monitor-actions {
+          flex: 0 0 auto;
           padding: 12px;
-          padding-bottom: calc(12px + env(safe-area-inset-bottom));
+          padding-bottom: calc(14px + env(safe-area-inset-bottom));
+        }
+        .popup-actions.three-btn {
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 10px;
         }
         .action-btn {
-          min-height: 54px;
-          border-radius: 13px;
-          font-size: 14px;
+          min-height: 62px;
+          border-radius: 16px;
+          font-size: 16px;
+          font-weight: 750;
         }
         .call-pip {
           left: 12px;
@@ -1043,8 +1098,17 @@ class DoorlockCard extends LitElement {
           aspect-ratio: 4 / 3;
         }
         .call-pip-actions .action-btn {
-          min-height: 48px;
-          font-size: 13px;
+          min-height: 56px;
+          font-size: 15px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .popup-actions.three-btn {
+          grid-template-columns: 1fr;
+        }
+        .action-btn {
+          min-height: 52px;
         }
       }
     `;
@@ -1974,15 +2038,28 @@ class DoorlockCard extends LitElement {
   /* =============== Call Popup =============== */
 
   _renderCallPopup() {
-    const answerBtn = this._callAnswered
+    const callActions = this._callAnswered
       ? html`
-        <button class="action-btn hangup" @click=${this._hangupCall}>
-          挂断
-        </button>`
+        <div class="popup-actions two-btn">
+          <button class="action-btn unlock" @click=${this._unlockDoor}>
+            解锁
+          </button>
+          <button class="action-btn hangup" @click=${this._hangupCall}>
+            挂断
+          </button>
+        </div>`
       : html`
-        <button class="action-btn answer" @click=${this._answerCall}>
-          接听
-        </button>`;
+        <div class="popup-actions three-btn">
+          <button class="action-btn answer" @click=${this._answerCall}>
+            接听
+          </button>
+          <button class="action-btn unlock" @click=${this._unlockDoor}>
+            解锁
+          </button>
+        <button class="action-btn hangup" @click=${this._hangupCall}>
+            挂断
+          </button>
+        </div>`;
 
     const headerClass = this._callAnswered ? 'answered' : '';
     const iconClass = this._callAnswered ? 'answered' : '';
@@ -2044,12 +2121,7 @@ class DoorlockCard extends LitElement {
             </div>
           </div>
 
-          <div class="popup-actions two-btn">
-            <button class="action-btn unlock" @click=${this._unlockDoor}>
-              解锁
-            </button>
-            ${answerBtn}
-          </div>
+          ${callActions}
         </div>
       </div>
     `;

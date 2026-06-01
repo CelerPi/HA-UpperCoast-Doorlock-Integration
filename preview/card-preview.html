@@ -96,6 +96,14 @@
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
     }
 
+    .phone-surface.mobile-preview {
+      max-width: 390px;
+      min-height: 720px;
+      margin: 0 auto;
+      border-radius: 34px;
+      padding: 18px;
+    }
+
     .side-panel {
       border: 1px solid rgba(255, 255, 255, 0.09);
       border-radius: 22px;
@@ -172,7 +180,7 @@
     </div>
 
     <div class="preview-grid">
-      <section class="phone-surface">
+      <section class="phone-surface mobile-preview">
         <doorlock-card id="main-card"></doorlock-card>
       </section>
 
@@ -190,7 +198,7 @@
         </div>
         <ul class="spec-list">
           <li>加载文件：<code>../custom_components/uppercoast_doorlock/frontend/doorlock-card.js</code></li>
-          <li>预览数据：由本页 mock Home Assistant 实体状态。</li>
+        <li>预览数据：由本页 mock Home Assistant 实体状态；切到“呼叫中/通话中”会打开真实呼叫弹窗。</li>
           <li>如果这里和 HA 里不同，通常就是 HA 还在用旧版 JS 或浏览器缓存。</li>
         </ul>
       </aside>
@@ -533,7 +541,9 @@
           },
           "camera.vds_video": {
             state: "idle",
-            attributes: {},
+            attributes: {
+              entity_picture: "./call-frame.svg",
+            },
           },
         },
         connection: {
@@ -549,7 +559,7 @@
       };
     }
 
-    function configureCard(card, stateName) {
+    function configureCard(card, stateName, options = {}) {
       card.setConfig({
         entity: "binary_sensor.vds_call_status",
         camera_entity: "camera.vds_video",
@@ -557,7 +567,8 @@
       card._wsUnavailable = true;
       card.hass = mockHass(stateName);
       card._callAnswered = states[stateName].callAnswered;
-      card._showCallPopup = false;
+      card._showCallPopup = options.showPopup && states[stateName].entityState === "on";
+      card._callMinimized = false;
       card._showMonitorSelector = false;
       card._showMonitorVideo = false;
       card.requestUpdate();
@@ -567,7 +578,7 @@
     await customElements.whenDefined("doorlock-card");
 
     const mainCard = document.querySelector("#main-card");
-    configureCard(mainCard, "idle");
+    configureCard(mainCard, "idle", { showPopup: true });
 
     document.querySelectorAll("[data-static-state]").forEach((card) => {
       configureCard(card, card.dataset.staticState);
@@ -577,7 +588,7 @@
       button.addEventListener("click", () => {
         document.querySelectorAll(".state-tabs button").forEach((item) => item.classList.remove("active"));
         button.classList.add("active");
-        configureCard(mainCard, button.dataset.state);
+        configureCard(mainCard, button.dataset.state, { showPopup: true });
       });
     });
   </script>
