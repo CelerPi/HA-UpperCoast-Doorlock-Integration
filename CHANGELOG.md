@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.4.6
+
+- **按 Home Assistant brands 规范修正品牌图标尺寸**
+  - `icon.png` / `dark_icon.png` 调整为 256x256
+  - `icon@2x.png` / `dark_icon@2x.png` 调整为 512x512
+  - 保持根目录 `brand/` 与集成内置 `brand/` 目录一致
+
 ## v0.4.5
 
 - **修复 HACS 深色主题下品牌图标不显示**
