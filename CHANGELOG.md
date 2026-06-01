@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.3.3
+
+- **修复默认仪表盘模式下资源版本号仍不更新**
+  - 不再要求 Lovelace mode 必须等于 `storage`
+  - 兼容 HA 默认 `auto-gen` 模式下的 storage resources
+  - 只要资源集合支持写入，就自动同步内置卡片版本号
+
 ## v0.3.2
 
 - **修复 Dashboard 资源版本号未自动同步**

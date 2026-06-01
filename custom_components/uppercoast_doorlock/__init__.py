@@ -93,14 +93,17 @@ async def _async_register_lovelace_resource(hass: HomeAssistant) -> None:
         async_call_later(hass, 5, _retry)
         return
 
-    if getattr(lovelace, "mode", None) != "storage":
-        _LOGGER.debug("Lovelace is not in storage mode; skipping automatic resource registration")
-        return
-
     resources = getattr(lovelace, "resources", None)
     if not resources:
         _LOGGER.debug("Lovelace resources are not ready; retrying resource registration")
         async_call_later(hass, 5, _retry)
+        return
+
+    if not all(
+        hasattr(resources, method)
+        for method in ("async_items", "async_update_item", "async_create_item", "async_delete_item")
+    ):
+        _LOGGER.debug("Lovelace resources are read-only; skipping automatic resource registration")
         return
 
     if not getattr(resources, "loaded", False):
