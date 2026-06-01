@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.4.2-blue)
+![version](https://img.shields.io/badge/version-v0.4.3-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.2` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.3` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -116,9 +116,9 @@ camera_entity: camera.vds_video
 
 本集成提供蓝图 `uppercoast_doorlock/mobile_call_notification.yaml`。更新集成并重启 Home Assistant 后，它会自动安装到 HA 的蓝图目录。每台手机创建一条自动化，选择对应的 `notify.*` 通知实体（例如 `notify.iphone_air`），并把“门禁仪表盘地址”设为放置 `custom:doorlock-card` 的视图路径。
 
-- 新版 HA `notify.*` 通知实体目前只支持基础通知字段
-- 收到通知后，打开 HA App 的门禁页面，在卡片里完成接听、解锁和挂断
-- 若你的 HA 仍提供 `notify.mobile_app_*` 动作服务，可自行扩展通知动作按钮
+- `手机通知实体` 选择 `notify.iphone_air` 等实体，用作基础通知兜底
+- 如开发者工具“动作”里存在 `notify.mobile_app_*`，可填到“手机 App 高级通知服务”，通知会带接听/查看、解锁、挂断按钮和跳转
+- iOS 通知按钮通常需要长按/下拉展开；Android 高优先级通知更容易以顶部横幅显示
 
 ## 依赖
 
