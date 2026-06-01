@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.4.7
+
+- **补齐 HACS 发布校验流程**
+  - 新增 GitHub Actions：HACS validation 与 Hassfest validation
+  - 修复 manifest 字段排序以通过 Hassfest
+  - 更新翻译文件结构，移除新版 Home Assistant 不再接受的 `options.title`
+
 ## v0.4.6
 
 - **按 Home Assistant brands 规范修正品牌图标尺寸**
