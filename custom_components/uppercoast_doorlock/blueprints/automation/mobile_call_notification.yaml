@@ -10,11 +10,12 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-    notify_service:
-      name: 手机通知服务
-      description: 例如 notify.mobile_app_iphone 或 notify.mobile_app_pixel。每台手机各创建一条自动化即可。
+    notify_entity:
+      name: 手机通知实体
+      description: 选择开发者工具状态页里看到的实体，例如 notify.iphone_air。每台手机各创建一条自动化即可。
       selector:
-        text:
+        entity:
+          domain: notify
     dashboard_uri:
       name: 门禁仪表盘地址
       description: 点“接听/查看”后在 HA App 内打开的地址。建议指向放置 doorlock-card 的视图。
@@ -68,6 +69,7 @@ trigger:
 
 variables:
   call_sensor: !input call_sensor
+  notify_entity: !input notify_entity
   dashboard_uri: !input dashboard_uri
   camera_entity: !input camera_entity
   ios_critical: !input ios_critical
@@ -88,8 +90,9 @@ action:
           - condition: trigger
             id: call_started
         sequence:
-          - service: !input notify_service
+          - service: notify.send_message
             data:
+              entity_id: !input notify_entity
               title: 门禁呼叫
               message: "{{ caller_name }} 正在呼叫"
               data:
@@ -135,8 +138,9 @@ action:
           - condition: trigger
             id: call_ended
         sequence:
-          - service: !input notify_service
+          - service: notify.send_message
             data:
+              entity_id: !input notify_entity
               message: clear_notification
               data:
                 tag: uppercoast_doorlock_call

@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.4.1
+
+- **修复新版 HA 通知实体导致蓝图动作未知**
+  - 蓝图输入从“通知服务”改为“通知实体”
+  - 通过 `notify.send_message` 向 `notify.iphone_air` 等通知实体发送消息
+  - 避免把 `notify.xxx` 实体误当成 action/service 导致自动化无法运行
+
 ## v0.4.0
 
 - **修复 WebSocket 前端断开时污染 HA 日志**
