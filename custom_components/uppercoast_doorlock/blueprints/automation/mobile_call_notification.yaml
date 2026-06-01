@@ -3,6 +3,13 @@ blueprint:
   description: 门口机呼叫时向 Home Assistant 手机 App 推送通知，支持打开接听、解锁、挂断和自动清除。
   domain: automation
   input:
+    call_sensor:
+      name: 门禁呼叫状态实体
+      description: 默认使用集成创建的 binary_sensor.vds_call_status。实体变为 on 时会推送来电通知。
+      default: binary_sensor.vds_call_status
+      selector:
+        entity:
+          domain: binary_sensor
     notify_service:
       name: 手机通知服务
       description: 例如 notify.mobile_app_iphone 或 notify.mobile_app_pixel。每台手机各创建一条自动化即可。
@@ -32,6 +39,16 @@ mode: parallel
 max: 10
 
 trigger:
+  - platform: state
+    entity_id: !input call_sensor
+    from: "off"
+    to: "on"
+    id: call_started
+  - platform: state
+    entity_id: !input call_sensor
+    from: "on"
+    to: "off"
+    id: call_ended
   - platform: event
     event_type: uppercoast_doorlock_call_started
     id: call_started
@@ -50,16 +67,19 @@ trigger:
     id: hangup
 
 variables:
+  call_sensor: !input call_sensor
   dashboard_uri: !input dashboard_uri
   camera_entity: !input camera_entity
   ios_critical: !input ios_critical
   target_ip: >-
-    {{ trigger.event.data.action_data.target_ip
-       | default(trigger.event.data.target_ip, true)
+    {{ trigger.event.data.action_data.target_ip if trigger.platform == 'event' and trigger.event.data.action_data is defined else
+       trigger.event.data.target_ip if trigger.platform == 'event' and trigger.event.data.target_ip is defined else
+       state_attr(call_sensor, 'target_ip')
        | default(state_attr('binary_sensor.vds_call_status', 'target_ip'), true) }}
   caller_name: >-
-    {{ trigger.event.data.display_name
-       | default(trigger.event.data.device_name, true)
+    {{ trigger.event.data.display_name if trigger.platform == 'event' and trigger.event.data.display_name is defined else
+       trigger.event.data.device_name if trigger.platform == 'event' and trigger.event.data.device_name is defined else
+       state_attr(call_sensor, 'display_name')
        | default('门口机', true) }}
 
 action:
