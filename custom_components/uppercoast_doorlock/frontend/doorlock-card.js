@@ -38,7 +38,6 @@ class DoorlockCard extends LitElement {
       _buildingName: { type: String, state: true },
       _dialInput: { type: String, state: true },
       _callHistory: { type: Array, state: true },
-      _cameraUrl: { type: String, state: true },
       _entityMissing: { type: Boolean, state: true },
       _connectionStatus: { type: String, state: true },
       _deviceCount: { type: Number, state: true },
@@ -727,6 +726,9 @@ class DoorlockCard extends LitElement {
         object-fit: contain;
         display: block;
       }
+      .video-frame img[src=""] {
+        display: none;
+      }
       .call-popup .video-frame {
         aspect-ratio: 4 / 3;
       }
@@ -909,6 +911,9 @@ class DoorlockCard extends LitElement {
         height: 100%;
         object-fit: cover;
         display: block;
+      }
+      .call-pip-video img[src=""] {
+        display: none;
       }
       .call-pip-placeholder {
         position: absolute;
@@ -1163,7 +1168,7 @@ class DoorlockCard extends LitElement {
     }
 
     if (data.type === 'frame' && data.jpeg) {
-      this._cameraUrl = `data:image/jpeg;base64,${data.jpeg}`;
+      this._setCameraImage(`data:image/jpeg;base64,${data.jpeg}`);
       return;
     }
 
@@ -1190,15 +1195,38 @@ class DoorlockCard extends LitElement {
     const cameraEntityId = this._cameraEntityId || 'camera.vds_video';
     const cameraState = this._hass?.states[cameraEntityId];
     if (!cameraState) {
-      this._cameraUrl = '';
+      this._setCameraImage('');
       return;
     }
     const entityPicture = cameraState.attributes.entity_picture;
     if (!entityPicture) {
-      this._cameraUrl = '';
+      this._setCameraImage('');
       return;
     }
-    this._cameraUrl = entityPicture + (entityPicture.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    this._setCameraImage(entityPicture + (entityPicture.includes('?') ? '&' : '?') + '_t=' + Date.now());
+  }
+
+  _setCameraImage(url) {
+    this._cameraUrl = url || '';
+    this._pendingCameraUrl = this._cameraUrl;
+    if (this._cameraFramePending) return;
+
+    this._cameraFramePending = true;
+    requestAnimationFrame(() => {
+      this._cameraFramePending = false;
+      const currentUrl = this._pendingCameraUrl || '';
+      const root = this.shadowRoot;
+      if (!root) return;
+
+      root.querySelectorAll('img.realtime-video').forEach((img) => {
+        if (img.getAttribute('src') !== currentUrl) {
+          img.setAttribute('src', currentUrl);
+        }
+      });
+      root.querySelectorAll('.video-overlay, .call-pip-placeholder').forEach((overlay) => {
+        overlay.style.display = currentUrl ? 'none' : '';
+      });
+    });
   }
 
   /* =============== Audio =============== */
@@ -1796,9 +1824,8 @@ class DoorlockCard extends LitElement {
             <button class="call-pip-close" @click=${(e) => { e.stopPropagation(); this._dismissCallPopup(); }}>×</button>
           </div>
           <div class="call-pip-video" @click=${this._expandCallPopup} title="点击放大">
-            ${this._cameraUrl
-              ? html`<img src="${this._cameraUrl}" alt="门禁视频" />`
-              : html`<div class="call-pip-placeholder">加载中...</div>`}
+            <img class="realtime-video" src="${this._cameraUrl || ''}" alt="门禁视频" />
+            <div class="call-pip-placeholder" style="${this._cameraUrl ? 'display:none' : ''}">加载中...</div>
           </div>
           <div class="call-pip-actions">
             <button class="action-btn unlock" @click=${(e) => { e.stopPropagation(); this._unlockDoor(); }}>
@@ -1835,14 +1862,11 @@ class DoorlockCard extends LitElement {
           </div>
 
           <div class="video-frame">
-            ${this._cameraUrl
-              ? html`<img src="${this._cameraUrl}" alt="门禁视频" />`
-              : html`
-                <div class="video-overlay">
-                  <div class="video-spinner"></div>
-                  正在加载视频...
-                </div>
-              `}
+            <img class="realtime-video" src="${this._cameraUrl || ''}" alt="门禁视频" />
+            <div class="video-overlay" style="${this._cameraUrl ? 'display:none' : ''}">
+              <div class="video-spinner"></div>
+              正在加载视频...
+            </div>
           </div>
 
           <div class="popup-actions two-btn">
@@ -1877,14 +1901,11 @@ class DoorlockCard extends LitElement {
           </div>
 
           <div class="video-frame">
-            ${this._cameraUrl
-              ? html`<img src="${this._cameraUrl}" alt="监控画面" />`
-              : html`
-                <div class="video-overlay">
-                  <div class="video-spinner"></div>
-                  正在加载视频...
-                </div>
-              `}
+            <img class="realtime-video" src="${this._cameraUrl || ''}" alt="监控画面" />
+            <div class="video-overlay" style="${this._cameraUrl ? 'display:none' : ''}">
+              <div class="video-spinner"></div>
+              正在加载视频...
+            </div>
           </div>
 
           <div class="monitor-actions">
