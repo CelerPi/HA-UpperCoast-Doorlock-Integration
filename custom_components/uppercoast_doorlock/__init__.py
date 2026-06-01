@@ -111,7 +111,7 @@ async def _async_register_lovelace_resource(hass: HomeAssistant) -> None:
     existing = [
         resource
         for resource in resources.async_items()
-        if _resource_path(resource.get("url", "")) == CARD_RESOURCE_PATH
+        if _is_card_resource(resource.get("url", ""))
     ]
 
     if existing:
@@ -141,6 +141,11 @@ async def _async_register_lovelace_resource(hass: HomeAssistant) -> None:
 
 def _resource_path(url: str) -> str:
     return url.split("?", 1)[0]
+
+
+def _is_card_resource(url: str) -> bool:
+    path = _resource_path(url)
+    return path == CARD_RESOURCE_PATH or path.endswith("/doorlock-card.js")
 
 
 def _get_entry_data(hass: HomeAssistant) -> dict[str, Any] | None:
@@ -284,6 +289,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, ("binary_sensor", "camera", "button"))
+    await _async_schedule_lovelace_resource_registration(hass)
 
     return True
 
