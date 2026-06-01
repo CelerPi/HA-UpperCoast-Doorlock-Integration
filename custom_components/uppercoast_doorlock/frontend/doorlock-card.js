@@ -1117,7 +1117,7 @@ class DoorlockCard extends LitElement {
   /* =============== Camera / Video =============== */
 
   _connectRealtime() {
-    if (!this._hass || this._wsConnecting || this._wsConnected || this._wsUnavailable) return;
+    if (!this._hass || this._wsConnecting || this._wsConnected) return;
 
     this._wsConnecting = true;
     const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -1131,6 +1131,7 @@ class DoorlockCard extends LitElement {
       this._wsConnecting = false;
       this._wsConnected = true;
       this._wsUnavailable = false;
+      this._wsReconnectDelay = 1000;
       this._stopCameraRefresh();
       if (this._audioPollInterval) {
         clearInterval(this._audioPollInterval);
@@ -1141,19 +1142,35 @@ class DoorlockCard extends LitElement {
     ws.onmessage = (event) => this._handleRealtimeMessage(event);
     ws.onerror = () => {
       this._wsUnavailable = true;
+      ws.close();
     };
     ws.onclose = () => {
       this._wsConnecting = false;
       this._wsConnected = false;
-      if (!this._wsUnavailable && this.isConnected) {
-        setTimeout(() => this._connectRealtime(), 3000);
+      if (this.isConnected) {
+        this._scheduleRealtimeReconnect();
       }
     };
+  }
+
+  _scheduleRealtimeReconnect() {
+    if (this._wsReconnectTimer) return;
+
+    const delay = this._wsReconnectDelay || 1000;
+    this._wsReconnectDelay = Math.min(delay * 1.5, 10000);
+    this._wsReconnectTimer = setTimeout(() => {
+      this._wsReconnectTimer = null;
+      this._connectRealtime();
+    }, delay);
   }
 
   _disconnectRealtime() {
     this._wsConnecting = false;
     this._wsConnected = false;
+    if (this._wsReconnectTimer) {
+      clearTimeout(this._wsReconnectTimer);
+      this._wsReconnectTimer = null;
+    }
     if (this._realtimeWs) {
       this._realtimeWs.close();
       this._realtimeWs = null;
@@ -1376,6 +1393,11 @@ class DoorlockCard extends LitElement {
   }
 
   async _startMicrophone(targetIp) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      console.warn('[DoorlockCard] Microphone is unavailable. Use HTTPS or the Home Assistant app for two-way audio.');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this._micStream = stream;
