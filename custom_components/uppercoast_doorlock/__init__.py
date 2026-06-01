@@ -289,22 +289,32 @@ class UpperCoastDoorlockWebsocketView(HomeAssistantView):
             return frontend_ws
 
         async def addon_to_frontend() -> None:
-            async for msg in addon_ws:
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    await frontend_ws.send_str(msg.data)
-                elif msg.type == aiohttp.WSMsgType.BINARY:
-                    await frontend_ws.send_bytes(msg.data)
-                elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                    break
+            try:
+                async for msg in addon_ws:
+                    if frontend_ws.closed:
+                        break
+                    if msg.type == aiohttp.WSMsgType.TEXT:
+                        await frontend_ws.send_str(msg.data)
+                    elif msg.type == aiohttp.WSMsgType.BINARY:
+                        await frontend_ws.send_bytes(msg.data)
+                    elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+                        break
+            except (ConnectionResetError, aiohttp.ClientConnectionError, RuntimeError) as exc:
+                _LOGGER.debug("Frontend websocket closed while forwarding addon data: %s", exc)
 
         async def frontend_to_addon() -> None:
-            async for msg in frontend_ws:
-                if msg.type == aiohttp.WSMsgType.TEXT:
-                    await addon_ws.send_str(msg.data)
-                elif msg.type == aiohttp.WSMsgType.BINARY:
-                    await addon_ws.send_bytes(msg.data)
-                elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                    break
+            try:
+                async for msg in frontend_ws:
+                    if addon_ws.closed:
+                        break
+                    if msg.type == aiohttp.WSMsgType.TEXT:
+                        await addon_ws.send_str(msg.data)
+                    elif msg.type == aiohttp.WSMsgType.BINARY:
+                        await addon_ws.send_bytes(msg.data)
+                    elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
+                        break
+            except (ConnectionResetError, aiohttp.ClientConnectionError, RuntimeError) as exc:
+                _LOGGER.debug("Addon websocket closed while forwarding frontend data: %s", exc)
 
         tasks = [
             asyncio.create_task(addon_to_frontend()),
@@ -316,8 +326,10 @@ class UpperCoastDoorlockWebsocketView(HomeAssistantView):
         for task in done:
             with contextlib.suppress(Exception, asyncio.CancelledError):
                 task.result()
-        await addon_ws.close()
-        await frontend_ws.close()
+        with contextlib.suppress(Exception):
+            await addon_ws.close()
+        with contextlib.suppress(Exception):
+            await frontend_ws.close()
         return frontend_ws
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
