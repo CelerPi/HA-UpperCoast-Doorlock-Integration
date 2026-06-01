@@ -5,6 +5,7 @@ import contextlib
 import json
 import logging
 from datetime import timedelta
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -29,6 +30,8 @@ _LOGGER = logging.getLogger(__name__)
 
 CARD_URL_PATH = f"/{DOMAIN}"
 CARD_STATIC_PATH = Path(__file__).parent / "frontend"
+BLUEPRINT_SOURCE_PATH = Path(__file__).parent / "blueprints" / "automation" / "mobile_call_notification.yaml"
+BLUEPRINT_TARGET_PATH = Path("blueprints") / "automation" / DOMAIN / "mobile_call_notification.yaml"
 MANIFEST_PATH = Path(__file__).parent / "manifest.json"
 with MANIFEST_PATH.open(encoding="utf-8") as manifest_file:
     INTEGRATION_VERSION = json.load(manifest_file).get("version", "0.0.0")
@@ -57,6 +60,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.http.register_view(UpperCoastDoorlockWebsocketPathView())
     hass.http.register_view(UpperCoastDoorlockWebsocketView())
     await _async_register_static_path(hass)
+    await _async_install_mobile_blueprint(hass)
     await _async_schedule_lovelace_resource_registration(hass)
     return True
 
@@ -152,6 +156,40 @@ def _resource_path(url: str) -> str:
 def _is_card_resource(url: str) -> bool:
     path = _resource_path(url)
     return path == CARD_RESOURCE_PATH or path.endswith("/doorlock-card.js")
+
+
+async def _async_install_mobile_blueprint(hass: HomeAssistant) -> None:
+    """Install the bundled mobile notification blueprint into HA's blueprint folder."""
+    if not BLUEPRINT_SOURCE_PATH.exists():
+        _LOGGER.debug("Bundled mobile blueprint is missing: %s", BLUEPRINT_SOURCE_PATH)
+        return
+
+    target = Path(hass.config.path(str(BLUEPRINT_TARGET_PATH)))
+    try:
+        source_content = await hass.async_add_executor_job(
+            BLUEPRINT_SOURCE_PATH.read_text,
+            "utf-8",
+        )
+
+        existing_content = None
+        if target.exists():
+            existing_content = await hass.async_add_executor_job(
+                target.read_text,
+                "utf-8",
+            )
+
+        if existing_content == source_content:
+            return
+
+        await hass.async_add_executor_job(
+            partial(target.parent.mkdir, parents=True, exist_ok=True)
+        )
+        await hass.async_add_executor_job(
+            partial(target.write_text, source_content, encoding="utf-8")
+        )
+        _LOGGER.info("Installed mobile notification blueprint to %s", target)
+    except OSError as exc:
+        _LOGGER.warning("Failed to install mobile notification blueprint: %s", exc)
 
 
 def _get_entry_data(hass: HomeAssistant) -> dict[str, Any] | None:

@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.3.7-blue)
+![version](https://img.shields.io/badge/version-v0.3.8-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.3.7` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.3.8` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -114,7 +114,7 @@ camera_entity: camera.vds_video
 
 ## 手机 App 通知
 
-本集成提供蓝图 `blueprints/automation/mobile_call_notification.yaml`。每台手机创建一条自动化，选择对应的 `notify.mobile_app_*` 服务，并把“门禁仪表盘地址”设为放置 `custom:doorlock-card` 的视图路径。
+本集成提供蓝图 `uppercoast_doorlock/mobile_call_notification.yaml`。更新集成并重启 Home Assistant 后，它会自动安装到 HA 的蓝图目录。每台手机创建一条自动化，选择对应的 `notify.mobile_app_*` 服务，并把“门禁仪表盘地址”设为放置 `custom:doorlock-card` 的视图路径。
 
 - 通知点“接听/查看”会在 HA App 内打开门禁卡片，进入接听界面
 - “解锁”和“挂断”可直接在通知上执行
