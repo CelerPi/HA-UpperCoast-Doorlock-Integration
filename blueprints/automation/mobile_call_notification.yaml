@@ -1,6 +1,6 @@
 blueprint:
   name: 云海湾门禁来电通知
-  description: 门口机呼叫时向 Home Assistant 手机 App 推送通知，支持打开接听、解锁、挂断和自动清除。
+  description: 门口机呼叫时向 Home Assistant 手机 App 推送基础通知。新版 notify 实体不支持动作按钮扩展，接听/解锁/挂断请进入门禁卡片操作。
   domain: automation
   input:
     call_sensor:
@@ -16,25 +16,6 @@ blueprint:
       selector:
         entity:
           domain: notify
-    dashboard_uri:
-      name: 门禁仪表盘地址
-      description: 点“接听/查看”后在 HA App 内打开的地址。建议指向放置 doorlock-card 的视图。
-      default: /dashboard-unknown/0
-      selector:
-        text:
-    camera_entity:
-      name: 通知预览摄像头
-      description: iOS 可展开为摄像头动态内容，Android 可显示摄像头快照。
-      default: camera.vds_video
-      selector:
-        entity:
-          domain: camera
-    ios_critical:
-      name: iOS Critical Alert
-      description: 开启后会尝试按 iOS 关键通知发送。需要 HA App 和系统侧允许 Critical Alerts。
-      default: false
-      selector:
-        boolean:
 
 mode: parallel
 max: 10
@@ -70,9 +51,6 @@ trigger:
 variables:
   call_sensor: !input call_sensor
   notify_entity: !input notify_entity
-  dashboard_uri: !input dashboard_uri
-  camera_entity: !input camera_entity
-  ios_critical: !input ios_critical
   target_ip: >-
     {{ trigger.event.data.action_data.target_ip if trigger.platform == 'event' and trigger.event.data.action_data is defined else
        trigger.event.data.target_ip if trigger.platform == 'event' and trigger.event.data.target_ip is defined else
@@ -94,45 +72,7 @@ action:
             data:
               entity_id: !input notify_entity
               title: 门禁呼叫
-              message: "{{ caller_name }} 正在呼叫"
-              data:
-                tag: uppercoast_doorlock_call
-                group: uppercoast_doorlock
-                channel: 门禁呼叫
-                notification_icon: mdi:doorbell-video
-                sticky: true
-                persistent: true
-                ttl: 0
-                priority: high
-                importance: high
-                entity_id: !input camera_entity
-                image: "/api/camera_proxy/{{ camera_entity }}"
-                clickAction: "{{ dashboard_uri }}"
-                url: "{{ dashboard_uri }}"
-                push:
-                  sound:
-                    name: default
-                    critical: "{{ 1 if ios_critical else 0 }}"
-                    volume: 1.0
-                  interruption-level: "{{ 'critical' if ios_critical else 'time-sensitive' }}"
-                actions:
-                  - action: URI
-                    title: 接听/查看
-                    uri: "{{ dashboard_uri }}"
-                    icon: sfsymbols:video.fill
-                  - action: UPPERCOAST_DOORLOCK_UNLOCK
-                    title: 解锁
-                    destructive: false
-                    authenticationRequired: true
-                    icon: sfsymbols:lock.open.fill
-                    action_data:
-                      target_ip: "{{ target_ip }}"
-                  - action: UPPERCOAST_DOORLOCK_HANGUP
-                    title: 挂断
-                    destructive: true
-                    icon: sfsymbols:phone.down.fill
-                    action_data:
-                      target_ip: "{{ target_ip }}"
+              message: "{{ caller_name }} 正在呼叫，请打开 Home Assistant 门禁页面接听。"
 
       - conditions:
           - condition: trigger
@@ -141,9 +81,8 @@ action:
           - service: notify.send_message
             data:
               entity_id: !input notify_entity
-              message: clear_notification
-              data:
-                tag: uppercoast_doorlock_call
+              title: 门禁呼叫结束
+              message: "{{ caller_name }} 呼叫已结束"
 
       - conditions:
           - condition: trigger

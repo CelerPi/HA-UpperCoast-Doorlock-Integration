@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.4.1-blue)
+![version](https://img.shields.io/badge/version-v0.4.2-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.1` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.2` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -116,10 +116,9 @@ camera_entity: camera.vds_video
 
 本集成提供蓝图 `uppercoast_doorlock/mobile_call_notification.yaml`。更新集成并重启 Home Assistant 后，它会自动安装到 HA 的蓝图目录。每台手机创建一条自动化，选择对应的 `notify.*` 通知实体（例如 `notify.iphone_air`），并把“门禁仪表盘地址”设为放置 `custom:doorlock-card` 的视图路径。
 
-- 通知点“接听/查看”会在 HA App 内打开门禁卡片，进入接听界面
-- “解锁”和“挂断”可直接在通知上执行
-- 通知会附带 `camera.vds_video` 预览；iOS 可展开动态摄像头内容，Android 可显示摄像头快照
-- Android 使用 `ttl: 0`、`priority: high`；iOS 可按需开启 Critical Alert
+- 新版 HA `notify.*` 通知实体目前只支持基础通知字段
+- 收到通知后，打开 HA App 的门禁页面，在卡片里完成接听、解锁和挂断
+- 若你的 HA 仍提供 `notify.mobile_app_*` 动作服务，可自行扩展通知动作按钮
 
 ## 依赖
 
