@@ -233,6 +233,8 @@ class UpperCoastDoorlockWebsocketView(HomeAssistantView):
             async for msg in addon_ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
                     await frontend_ws.send_str(msg.data)
+                elif msg.type == aiohttp.WSMsgType.BINARY:
+                    await frontend_ws.send_bytes(msg.data)
                 elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                     break
 
@@ -240,6 +242,8 @@ class UpperCoastDoorlockWebsocketView(HomeAssistantView):
             async for msg in frontend_ws:
                 if msg.type == aiohttp.WSMsgType.TEXT:
                     await addon_ws.send_str(msg.data)
+                elif msg.type == aiohttp.WSMsgType.BINARY:
+                    await addon_ws.send_bytes(msg.data)
                 elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                     break
 

@@ -1124,6 +1124,7 @@ class DoorlockCard extends LitElement {
     const token = encodeURIComponent(this._getAuthToken());
     const url = `${scheme}://${window.location.host}/api/uppercoast_doorlock/ws?token=${token}`;
     const ws = new WebSocket(url);
+    ws.binaryType = 'arraybuffer';
     this._realtimeWs = ws;
 
     ws.onopen = () => {
@@ -1160,6 +1161,16 @@ class DoorlockCard extends LitElement {
   }
 
   _handleRealtimeMessage(event) {
+    if (event.data instanceof ArrayBuffer) {
+      this._handleRealtimeBinary(event.data);
+      return;
+    }
+
+    if (event.data instanceof Blob) {
+      event.data.arrayBuffer().then((buffer) => this._handleRealtimeBinary(buffer));
+      return;
+    }
+
     let data;
     try {
       data = JSON.parse(event.data);
@@ -1175,6 +1186,26 @@ class DoorlockCard extends LitElement {
     if (data.type === 'audio' && data.pcm) {
       this._audioLastId = Math.max(this._audioLastId || 0, data.id || 0);
       this._queueAudio(data.pcm);
+    }
+  }
+
+  _handleRealtimeBinary(buffer) {
+    if (!buffer || buffer.byteLength < 8) return;
+
+    const bytes = new Uint8Array(buffer);
+    const type = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+    const id = new DataView(buffer).getUint32(4, false);
+    const payload = bytes.slice(8);
+
+    if (type === 'VDSF') {
+      this._cameraLastFrameId = id;
+      this._setCameraBytes(payload);
+      return;
+    }
+
+    if (type === 'VDSA') {
+      this._audioLastId = Math.max(this._audioLastId || 0, id);
+      this._queueAudioBytes(payload);
     }
   }
 
@@ -1206,7 +1237,22 @@ class DoorlockCard extends LitElement {
     this._setCameraImage(entityPicture + (entityPicture.includes('?') ? '&' : '?') + '_t=' + Date.now());
   }
 
+  _setCameraBytes(bytes) {
+    if (!bytes || !bytes.length) return;
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+    if (this._cameraObjectUrl && this._cameraObjectUrl !== url) {
+      this._cameraRevokeQueue = this._cameraRevokeQueue || [];
+      this._cameraRevokeQueue.push(this._cameraObjectUrl);
+    }
+    this._cameraObjectUrl = url;
+    this._setCameraImage(url);
+  }
+
   _setCameraImage(url) {
+    if (this._cameraObjectUrl && url !== this._cameraObjectUrl) {
+      URL.revokeObjectURL(this._cameraObjectUrl);
+      this._cameraObjectUrl = '';
+    }
     this._cameraUrl = url || '';
     this._pendingCameraUrl = this._cameraUrl;
     if (this._cameraFramePending) return;
@@ -1225,6 +1271,11 @@ class DoorlockCard extends LitElement {
       });
       root.querySelectorAll('.video-overlay, .call-pip-placeholder').forEach((overlay) => {
         overlay.style.display = currentUrl ? 'none' : '';
+      });
+      const revokeQueue = this._cameraRevokeQueue || [];
+      this._cameraRevokeQueue = [];
+      revokeQueue.forEach((objectUrl) => {
+        if (objectUrl !== currentUrl) URL.revokeObjectURL(objectUrl);
       });
     });
   }
@@ -1288,7 +1339,15 @@ class DoorlockCard extends LitElement {
       const binary = atob(base64Pcm);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const int16 = new Int16Array(bytes.buffer);
+      this._queueAudioBytes(bytes);
+    } catch (e) {
+      console.error('[DoorlockCard] Audio decode error:', e);
+    }
+  }
+
+  _queueAudioBytes(bytes) {
+    try {
+      const int16 = new Int16Array(bytes.buffer, bytes.byteOffset, Math.floor(bytes.byteLength / 2));
       const float32 = new Float32Array(int16.length);
       for (let i = 0; i < int16.length; i++) {
         float32[i] = int16[i] / 32768;

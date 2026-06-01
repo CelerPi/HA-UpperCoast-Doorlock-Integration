@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.3.1
+
+- **改用 WebSocket 二进制媒体帧**
+  - Addon 到前端的视频帧改为直接传输 JPEG bytes，移除 JSON/base64 开销
+  - 音频帧改为直接传输 PCM bytes，保留旧 JSON/base64 兼容解析
+  - Integration WebSocket 代理支持二进制消息透传
+
 ## v0.3.0
 
 - **优化实时视频播放流畅度**
