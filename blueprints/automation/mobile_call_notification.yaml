@@ -41,6 +41,18 @@ blueprint:
       default: false
       selector:
         boolean:
+    notification_sound:
+      name: iOS 通知声音文件名
+      description: iOS 高级通知使用。可填 default，或 HA App 已导入的声音完整文件名，例如 Alarm.caf / doorbell.wav。
+      default: default
+      selector:
+        text:
+    android_channel:
+      name: Android 通知频道
+      description: Android 高级通知使用。可填一个专用频道名，然后在 Android 系统/HA App 通知频道里给它设置长铃声。
+      default: 门禁呼叫
+      selector:
+        text:
 
 mode: parallel
 max: 10
@@ -80,6 +92,8 @@ variables:
   dashboard_uri: !input dashboard_uri
   camera_entity: !input camera_entity
   ios_critical: !input ios_critical
+  notification_sound: !input notification_sound
+  android_channel: !input android_channel
   target_ip: >-
     {{ trigger.event.data.action_data.target_ip if trigger.platform == 'event' and trigger.event.data.action_data is defined else
        trigger.event.data.target_ip if trigger.platform == 'event' and trigger.event.data.target_ip is defined else
@@ -109,7 +123,7 @@ action:
                       data:
                         tag: uppercoast_doorlock_call
                         group: uppercoast_doorlock
-                        channel: 门禁呼叫
+                        channel: "{{ android_channel }}"
                         notification_icon: mdi:doorbell-video
                         sticky: true
                         persistent: true
@@ -122,7 +136,7 @@ action:
                         url: "{{ dashboard_uri }}"
                         push:
                           sound:
-                            name: default
+                            name: "{{ notification_sound }}"
                             critical: "{{ 1 if ios_critical else 0 }}"
                             volume: 1.0
                           interruption-level: "{{ 'critical' if ios_critical else 'time-sensitive' }}"

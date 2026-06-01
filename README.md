@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.4.3-blue)
+![version](https://img.shields.io/badge/version-v0.4.4-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.3` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.4` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -118,6 +118,7 @@ camera_entity: camera.vds_video
 
 - `手机通知实体` 选择 `notify.iphone_air` 等实体，用作基础通知兜底
 - 如开发者工具“动作”里存在 `notify.mobile_app_*`，可填到“手机 App 高级通知服务”，通知会带接听/查看、解锁、挂断按钮和跳转
+- `iOS 通知声音文件名` 可填 `default` 或 HA App 已导入的声音完整文件名；Android 请用“Android 通知频道”并在系统通知频道里设置长铃声
 - iOS 通知按钮通常需要长按/下拉展开；Android 高优先级通知更容易以顶部横幅显示
 
 ## 依赖
