@@ -1207,19 +1207,7 @@ class DoorlockCard extends LitElement {
     if (this._audioCtx) return;
     this._audioCtx = new AudioContext();
     this._audioQueue = [];
-    this._audioProcessor = this._audioCtx.createScriptProcessor(256, 0, 1);
-    this._audioProcessor.onaudioprocess = (e) => {
-      const output = e.outputBuffer.getChannelData(0);
-      if (this._audioQueue.length > 0) {
-        const chunk = this._audioQueue.shift();
-        const len = Math.min(output.length, chunk.length);
-        for (let i = 0; i < len; i++) output[i] = chunk[i];
-        for (let i = len; i < output.length; i++) output[i] = 0;
-      } else {
-        for (let i = 0; i < output.length; i++) output[i] = 0;
-      }
-    };
-    this._audioProcessor.connect(this._audioCtx.destination);
+    this._audioNextTime = this._audioCtx.currentTime + 0.12;
   }
 
   _startAudio(targetIp) {
@@ -1228,6 +1216,7 @@ class DoorlockCard extends LitElement {
     this._initAudio();
     this._audioLastId = 0;
     this._audioQueue = [];
+    this._audioNextTime = this._audioCtx.currentTime + 0.12;
     this._startMicrophone(targetIp);
     if (!this._wsConnected) {
       this._audioPollInterval = setInterval(() => this._pollAudio(targetIp), 50);
@@ -1241,6 +1230,7 @@ class DoorlockCard extends LitElement {
     }
     this._stopMicrophone();
     this._audioQueue = [];
+    this._audioNextTime = 0;
   }
 
   async _pollAudio(targetIp) {
@@ -1275,10 +1265,27 @@ class DoorlockCard extends LitElement {
       for (let i = 0; i < int16.length; i++) {
         float32[i] = int16[i] / 32768;
       }
-      this._audioQueue.push(float32);
+      this._scheduleAudio(float32);
     } catch (e) {
       console.error('[DoorlockCard] Audio decode error:', e);
     }
+  }
+
+  _scheduleAudio(samples) {
+    if (!this._audioCtx) this._initAudio();
+    const buffer = this._audioCtx.createBuffer(1, samples.length, 8000);
+    buffer.copyToChannel(samples, 0);
+
+    const source = this._audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(this._audioCtx.destination);
+
+    const now = this._audioCtx.currentTime;
+    if (!this._audioNextTime || this._audioNextTime < now + 0.08) {
+      this._audioNextTime = now + 0.08;
+    }
+    source.start(this._audioNextTime);
+    this._audioNextTime += buffer.duration;
   }
 
   async _startMicrophone(targetIp) {
