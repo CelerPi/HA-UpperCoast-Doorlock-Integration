@@ -1041,6 +1041,7 @@ class DoorlockCard extends LitElement {
     this._entityMissing = false;
     this._connectionStatus = 'unknown';
     this._deviceCount = 0;
+    this._runtimeAudioId = 0;
   }
 
   set hass(hass) {
@@ -1104,6 +1105,7 @@ class DoorlockCard extends LitElement {
     this._devices = a.devices || [];
     this._deviceCount = Number(a.device_count ?? this._devices.length ?? 0);
     this._connectionStatus = a.connection_status || 'unknown';
+    this._runtimeAudioId = Number(a.audio_id || 0);
 
     // 调试日志：在浏览器开发者工具 Console 中查看
     console.debug('[DoorlockCard] 状态更新:', {
@@ -1325,7 +1327,7 @@ class DoorlockCard extends LitElement {
     if (!targetIp) return;
     this._stopAudio();
     this._initAudio();
-    this._audioLastId = 0;
+    this._audioLastId = Math.max(this._audioLastId || 0, this._runtimeAudioId || 0);
     this._audioQueue = [];
     this._audioNextTime = this._audioCtx.currentTime + 0.12;
     this._startMicrophone(targetIp);
@@ -1367,6 +1369,7 @@ class DoorlockCard extends LitElement {
   }
 
   _queueAudio(base64Pcm) {
+    if (!this._callAnswered) return;
     try {
       const binary = atob(base64Pcm);
       const bytes = new Uint8Array(binary.length);
@@ -1378,6 +1381,7 @@ class DoorlockCard extends LitElement {
   }
 
   _queueAudioBytes(bytes) {
+    if (!this._callAnswered) return;
     try {
       const int16 = new Int16Array(bytes.buffer, bytes.byteOffset, Math.floor(bytes.byteLength / 2));
       const float32 = new Float32Array(int16.length);

@@ -56,6 +56,10 @@ class UpperCoastDoorlockBinarySensor(CoordinatorEntity, BinarySensorEntity):
             "device_count": len(devices),
             "api_url": api_url,
             "connection_status": "disconnected" if connection_error else "connected",
+            "frame_id": runtime.get("frame_id", 0),
+            "audio_id": runtime.get("audio_id", 0),
+            "has_frame": runtime.get("has_frame", False),
+            "has_audio": runtime.get("has_audio", False),
         }
 
         if connection_error:
