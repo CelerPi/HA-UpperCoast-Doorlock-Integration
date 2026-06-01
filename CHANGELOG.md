@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.4.5
+
+- **修复 HACS 深色主题下品牌图标不显示**
+  - 补充 `dark_icon.png`、`dark_icon@2x.png`、`dark_logo.png`、`dark_logo@2x.png`
+  - 根目录 `brand/` 和集成内置 `custom_components/uppercoast_doorlock/brand/` 同步提供深色主题资源
+  - 避免 HACS 请求 `/dark_icon.png` 时显示 `icon not available`
+
 ## v0.4.4
 
 - **支持更像门铃的通知声音设置**

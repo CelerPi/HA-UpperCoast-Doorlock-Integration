@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.4.4-blue)
+![version](https://img.shields.io/badge/version-v0.4.5-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -58,8 +58,12 @@ custom_components/uppercoast_doorlock/
 ├── brand/
 │   ├── icon.png
 │   ├── icon@2x.png
+│   ├── dark_icon.png
+│   ├── dark_icon@2x.png
 │   ├── logo.png
-│   └── logo@2x.png
+│   ├── logo@2x.png
+│   ├── dark_logo.png
+│   └── dark_logo@2x.png
 ├── frontend/
 │   ├── doorlock-card.js
 │   └── assets/icon.png
@@ -71,8 +75,12 @@ blueprints/automation/
 brand/
 ├── icon.png
 ├── icon@2x.png
+├── dark_icon.png
+├── dark_icon@2x.png
 ├── logo.png
-└── logo@2x.png
+├── logo@2x.png
+├── dark_logo.png
+└── dark_logo@2x.png
 ```
 
 ## 配置
@@ -93,7 +101,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.4` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.4.5` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
