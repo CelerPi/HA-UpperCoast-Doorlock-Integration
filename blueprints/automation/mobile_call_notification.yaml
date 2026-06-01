@@ -1,19 +1,32 @@
 blueprint:
   name: 云海湾门禁来电通知
-  description: 门口机呼叫时向 Home Assistant 手机 App 推送通知，并提供打开画面、解锁和挂断按钮。
+  description: 门口机呼叫时向 Home Assistant 手机 App 推送通知，支持打开接听、解锁、挂断和自动清除。
   domain: automation
   input:
     notify_service:
       name: 手机通知服务
-      description: 例如 notify.mobile_app_iphone 或 notify.mobile_app_pixel。iOS 和 Android 都使用 mobile_app 通知服务。
+      description: 例如 notify.mobile_app_iphone 或 notify.mobile_app_pixel。每台手机各创建一条自动化即可。
       selector:
         text:
     dashboard_uri:
-      name: 打开画面的地址
-      description: 通知里的“打开画面”按钮会跳转到这个 HA App 内部地址。
+      name: 门禁仪表盘地址
+      description: 点“接听/查看”后在 HA App 内打开的地址。建议指向放置 doorlock-card 的视图。
       default: /dashboard-unknown/0
       selector:
         text:
+    camera_entity:
+      name: 通知预览摄像头
+      description: iOS 可展开为摄像头动态内容，Android 可显示摄像头快照。
+      default: camera.vds_video
+      selector:
+        entity:
+          domain: camera
+    ios_critical:
+      name: iOS Critical Alert
+      description: 开启后会尝试按 iOS 关键通知发送。需要 HA App 和系统侧允许 Critical Alerts。
+      default: false
+      selector:
+        boolean:
 
 mode: parallel
 max: 10
@@ -22,6 +35,9 @@ trigger:
   - platform: event
     event_type: uppercoast_doorlock_call_started
     id: call_started
+  - platform: event
+    event_type: uppercoast_doorlock_call_ended
+    id: call_ended
   - platform: event
     event_type: mobile_app_notification_action
     event_data:
@@ -33,6 +49,19 @@ trigger:
       action: UPPERCOAST_DOORLOCK_HANGUP
     id: hangup
 
+variables:
+  dashboard_uri: !input dashboard_uri
+  camera_entity: !input camera_entity
+  ios_critical: !input ios_critical
+  target_ip: >-
+    {{ trigger.event.data.action_data.target_ip
+       | default(trigger.event.data.target_ip, true)
+       | default(state_attr('binary_sensor.vds_call_status', 'target_ip'), true) }}
+  caller_name: >-
+    {{ trigger.event.data.display_name
+       | default(trigger.event.data.device_name, true)
+       | default('门口机', true) }}
+
 action:
   - choose:
       - conditions:
@@ -42,30 +71,55 @@ action:
           - service: !input notify_service
             data:
               title: 门禁呼叫
-              message: >-
-                {{ trigger.event.data.display_name or trigger.event.data.device_name or '门口机' }}
-                正在呼叫
+              message: "{{ caller_name }} 正在呼叫"
               data:
                 tag: uppercoast_doorlock_call
                 group: uppercoast_doorlock
-                importance: high
+                channel: 门禁呼叫
+                notification_icon: mdi:doorbell-video
+                sticky: true
+                persistent: true
                 ttl: 0
                 priority: high
-                channel: 门禁呼叫
+                importance: high
+                entity_id: !input camera_entity
+                image: "/api/camera_proxy/{{ camera_entity }}"
+                clickAction: "{{ dashboard_uri }}"
+                url: "{{ dashboard_uri }}"
                 push:
-                  interruption-level: time-sensitive
+                  sound:
+                    name: default
+                    critical: "{{ 1 if ios_critical else 0 }}"
+                    volume: 1.0
+                  interruption-level: "{{ 'critical' if ios_critical else 'time-sensitive' }}"
                 actions:
                   - action: URI
-                    title: 打开画面
-                    uri: !input dashboard_uri
+                    title: 接听/查看
+                    uri: "{{ dashboard_uri }}"
+                    icon: sfsymbols:video.fill
                   - action: UPPERCOAST_DOORLOCK_UNLOCK
                     title: 解锁
+                    destructive: false
+                    authenticationRequired: true
+                    icon: sfsymbols:lock.open.fill
                     action_data:
-                      target_ip: "{{ trigger.event.data.target_ip }}"
+                      target_ip: "{{ target_ip }}"
                   - action: UPPERCOAST_DOORLOCK_HANGUP
                     title: 挂断
+                    destructive: true
+                    icon: sfsymbols:phone.down.fill
                     action_data:
-                      target_ip: "{{ trigger.event.data.target_ip }}"
+                      target_ip: "{{ target_ip }}"
+
+      - conditions:
+          - condition: trigger
+            id: call_ended
+        sequence:
+          - service: !input notify_service
+            data:
+              message: clear_notification
+              data:
+                tag: uppercoast_doorlock_call
 
       - conditions:
           - condition: trigger
@@ -73,9 +127,7 @@ action:
         sequence:
           - service: uppercoast_doorlock.unlock
             data:
-              target_ip: >-
-                {{ trigger.event.data.action_data.target_ip
-                   | default(state_attr('binary_sensor.vds_call_status', 'target_ip'), true) }}
+              target_ip: "{{ target_ip }}"
 
       - conditions:
           - condition: trigger
@@ -83,6 +135,4 @@ action:
         sequence:
           - service: uppercoast_doorlock.hangup
             data:
-              target_ip: >-
-                {{ trigger.event.data.action_data.target_ip
-                   | default(state_attr('binary_sensor.vds_call_status', 'target_ip'), true) }}
+              target_ip: "{{ target_ip }}"

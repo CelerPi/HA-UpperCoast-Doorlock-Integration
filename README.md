@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.3.6-blue)
+![version](https://img.shields.io/badge/version-v0.3.7-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -93,7 +93,7 @@ brand/
 
 | 参数 | 值 |
 |------|----|
-| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.3.6` |
+| URL | `/uppercoast_doorlock/doorlock-card.js?v=0.3.7` |
 | 资源类型 | `JavaScript Module` |
 
 添加资源并刷新浏览器后，可以在仪表盘编辑界面直接搜索「云海湾门禁」添加；也可以使用 YAML：
@@ -111,6 +111,15 @@ camera_entity: camera.vds_video
 ```
 
 > 集成会在 Home Assistant 默认的 storage 仪表盘模式下自动创建或更新这条资源；上面的 URL 主要用于排查或 YAML 模式手动配置。如果之前安装过独立的 Dashboard 卡片仓库，建议删除旧资源 `/local/HA-UpperCoast-DoorLock-Card.js`，避免旧资源先注册同名 `custom:doorlock-card`。
+
+## 手机 App 通知
+
+本集成提供蓝图 `blueprints/automation/mobile_call_notification.yaml`。每台手机创建一条自动化，选择对应的 `notify.mobile_app_*` 服务，并把“门禁仪表盘地址”设为放置 `custom:doorlock-card` 的视图路径。
+
+- 通知点“接听/查看”会在 HA App 内打开门禁卡片，进入接听界面
+- “解锁”和“挂断”可直接在通知上执行
+- 通知会附带 `camera.vds_video` 预览；iOS 可展开动态摄像头内容，Android 可显示摄像头快照
+- Android 使用 `ttl: 0`、`priority: high`；iOS 可按需开启 Critical Alert
 
 ## 依赖
 

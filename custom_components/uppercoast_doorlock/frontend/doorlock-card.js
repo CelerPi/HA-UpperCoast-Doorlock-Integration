@@ -1001,6 +1001,52 @@ class DoorlockCard extends LitElement {
         gap: 12px;
         padding: 14px 16px 16px;
       }
+
+      @media (max-width: 600px) {
+        .popup-overlay,
+        .monitor-popup {
+          align-items: stretch;
+          justify-content: flex-end;
+          padding: 12px;
+        }
+        .popup.call-popup,
+        .monitor-popup-content {
+          max-width: none;
+          width: 100%;
+          border-radius: 22px;
+        }
+        .popup-header,
+        .monitor-header {
+          padding: 14px 16px;
+        }
+        .popup-actions,
+        .monitor-actions {
+          padding: 12px;
+          padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        }
+        .action-btn {
+          min-height: 54px;
+          border-radius: 13px;
+          font-size: 14px;
+        }
+        .call-pip {
+          left: 12px;
+          right: 12px;
+          bottom: calc(12px + env(safe-area-inset-bottom));
+          width: auto;
+        }
+        .call-pip:hover,
+        .call-pip:active {
+          transform: none;
+        }
+        .call-pip-video {
+          aspect-ratio: 4 / 3;
+        }
+        .call-pip-actions .action-btn {
+          min-height: 48px;
+          font-size: 13px;
+        }
+      }
     `;
   }
 
@@ -1076,7 +1122,7 @@ class DoorlockCard extends LitElement {
         // 新的呼入开始
         this._callAnswered = false;
         this._callPopupDismissed = false;
-        this._callMinimized = true;
+        this._callMinimized = this._shouldMinimizeNewCall();
         this._showCallPopup = true;
         this._showMonitorSelector = false;
         this._showMonitorVideo = false;
@@ -1318,7 +1364,12 @@ class DoorlockCard extends LitElement {
 
   _initAudio() {
     if (this._audioCtx) return;
-    this._audioCtx = new AudioContext();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      console.warn('[DoorlockCard] AudioContext is unavailable on this client.');
+      return;
+    }
+    this._audioCtx = new AudioContextClass();
     this._audioQueue = [];
     this._audioNextTime = this._audioCtx.currentTime + 0.12;
   }
@@ -1327,6 +1378,10 @@ class DoorlockCard extends LitElement {
     if (!targetIp) return;
     this._stopAudio();
     this._initAudio();
+    if (!this._audioCtx) return;
+    if (this._audioCtx.state === 'suspended') {
+      this._audioCtx.resume();
+    }
     this._audioLastId = Math.max(this._audioLastId || 0, this._runtimeAudioId || 0);
     this._audioQueue = [];
     this._audioNextTime = this._audioCtx.currentTime + 0.12;
@@ -1418,9 +1473,25 @@ class DoorlockCard extends LitElement {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
       this._micStream = stream;
-      this._micCtx = new AudioContext();
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) {
+        stream.getTracks().forEach((t) => t.stop());
+        this._micStream = null;
+        console.warn('[DoorlockCard] AudioContext is unavailable for microphone capture.');
+        return;
+      }
+      this._micCtx = new AudioContextClass();
+      if (this._micCtx.state === 'suspended') {
+        await this._micCtx.resume();
+      }
       const source = this._micCtx.createMediaStreamSource(stream);
       this._micProcessor = this._micCtx.createScriptProcessor(4096, 1, 1);
       this._micProcessor.onaudioprocess = (e) => this._onAudioProcess(e, targetIp);
@@ -1507,6 +1578,10 @@ class DoorlockCard extends LitElement {
 
   _getDoors() {
     return this._devices || [];
+  }
+
+  _shouldMinimizeNewCall() {
+    return window.matchMedia?.('(min-width: 700px) and (pointer: fine)').matches ?? true;
   }
 
   _getFloorColor(floorLabel) {
