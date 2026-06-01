@@ -1116,13 +1116,28 @@ class DoorlockCard extends LitElement {
 
   /* =============== Camera / Video =============== */
 
-  _connectRealtime() {
+  async _connectRealtime() {
     if (!this._hass || this._wsConnecting || this._wsConnected) return;
 
     this._wsConnecting = true;
     const scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const token = encodeURIComponent(this._getAuthToken());
-    const url = `${scheme}://${window.location.host}/api/uppercoast_doorlock/ws?token=${token}`;
+    let signedPath;
+    try {
+      const token = this._getAuthToken();
+      const resp = await fetch('/api/uppercoast_doorlock/ws_path', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.ok || !data.path) throw new Error(data.error || 'failed_to_sign_ws_path');
+      signedPath = data.path;
+    } catch (e) {
+      this._wsConnecting = false;
+      this._wsUnavailable = true;
+      this._scheduleRealtimeReconnect();
+      return;
+    }
+
+    const url = `${scheme}://${window.location.host}${signedPath}`;
     const ws = new WebSocket(url);
     ws.binaryType = 'arraybuffer';
     this._realtimeWs = ws;

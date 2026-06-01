@@ -1,5 +1,12 @@
 # 更新日志
 
+## v0.3.5
+
+- **修复 WebSocket 握手持续失败**
+  - 新增 `/api/uppercoast_doorlock/ws_path`，通过 HA `authSig` 生成短期签名 WebSocket 路径
+  - 前端先用 Bearer token 获取签名路径，再建立 WebSocket
+  - WebSocket 视图交回 HA 标准鉴权中间件处理，避免 query token 自校验失败
+
 ## v0.3.4
 
 - **增强 WebSocket 重连和麦克风兼容性**

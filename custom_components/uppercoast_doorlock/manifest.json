@@ -1,7 +1,7 @@
 {
   "domain": "uppercoast_doorlock",
   "name": "虚拟门禁系统",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "documentation": "https://github.com/CelerPi/HA-UpperCoast-Doorlock-Integration",
   "issue_tracker": "https://github.com/CelerPi/HA-UpperCoast-Doorlock-Integration/issues",
   "dependencies": ["frontend", "http"],

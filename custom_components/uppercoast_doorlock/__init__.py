@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import json
 import logging
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,7 @@ import aiohttp
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.components.http import HomeAssistantView, StaticPathConfig
+from homeassistant.components.http.auth import async_sign_path
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_TOKEN
 from homeassistant.core import CoreState, EVENT_HOMEASSISTANT_STARTED, HomeAssistant
@@ -52,6 +54,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.data.setdefault(DOMAIN, {})
     setup_services(hass)
     hass.http.register_view(UpperCoastDoorlockAudioView())
+    hass.http.register_view(UpperCoastDoorlockWebsocketPathView())
     hass.http.register_view(UpperCoastDoorlockWebsocketView())
     await _async_register_static_path(hass)
     await _async_schedule_lovelace_resource_registration(hass)
@@ -204,22 +207,32 @@ class UpperCoastDoorlockAudioView(HomeAssistantView):
             return web.json_response({"ok": False, "error": str(exc)})
 
 
+class UpperCoastDoorlockWebsocketPathView(HomeAssistantView):
+    """返回带 HA authSig 的 WebSocket 代理路径。"""
+
+    url = "/api/uppercoast_doorlock/ws_path"
+    name = "api:uppercoast_doorlock:ws_path"
+    requires_auth = True
+
+    async def get(self, request: web.Request) -> web.Response:
+        hass = request.app["hass"]
+        path = async_sign_path(
+            hass,
+            UpperCoastDoorlockWebsocketView.url,
+            timedelta(minutes=2),
+        )
+        return web.json_response({"ok": True, "path": path})
+
+
 class UpperCoastDoorlockWebsocketView(HomeAssistantView):
     """代理 addon WebSocket，避免前端直接暴露 addon token。"""
 
     url = "/api/uppercoast_doorlock/ws"
     name = "api:uppercoast_doorlock:ws"
-    requires_auth = False
+    requires_auth = True
 
     async def get(self, request: web.Request) -> web.WebSocketResponse:
         hass = request.app["hass"]
-        if not await self._authorized(hass, request):
-            frontend_ws = web.WebSocketResponse(heartbeat=20)
-            await frontend_ws.prepare(request)
-            await frontend_ws.send_json({"type": "error", "error": "unauthorized"})
-            await frontend_ws.close()
-            return frontend_ws
-
         entry_data = _get_entry_data(hass)
         frontend_ws = web.WebSocketResponse(heartbeat=20)
         await frontend_ws.prepare(request)
@@ -268,13 +281,6 @@ class UpperCoastDoorlockWebsocketView(HomeAssistantView):
         await addon_ws.close()
         await frontend_ws.close()
         return frontend_ws
-
-    async def _authorized(self, hass: HomeAssistant, request: web.Request) -> bool:
-        token = request.query.get("token", "")
-        if not token:
-            return False
-        return await hass.auth.async_validate_access_token(token) is not None
-
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
