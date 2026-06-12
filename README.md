@@ -1,6 +1,6 @@
 # 云海湾门禁-集成
 
-![version](https://img.shields.io/badge/version-v0.4.8-blue)
+![version](https://img.shields.io/badge/version-v0.4.9-blue)
 ![hacs](https://img.shields.io/badge/hacs-default-orange)
 ![ha-version](https://img.shields.io/badge/HA-2026.5.0%2B-41BDF5)
 
@@ -132,7 +132,7 @@ camera_entity: camera.vds_video
 ## 依赖
 
 - Home Assistant 2026.5.0 或更高版本
-- **[uppercoast_doorlock Addon](https://github.com/CelerPi/HA_Virtual_Doorlock_System_App)** 已安装并运行
+- **[uppercoast_doorlock Addon](https://github.com/CelerPi/HA-Virtual-Doorlock-System-App)** 已安装并运行
 
 ## 故障排查
 
@@ -153,7 +153,7 @@ camera_entity: camera.vds_video
 | 仓库 | 说明 |
 |------|------|
 | [HA-UpperCoast-Doorlock-Integration](https://github.com/CelerPi/HA-UpperCoast-Doorlock-Integration) | 本仓库，集成源码 |
-| [HA_Virtual_Doorlock_System_App](https://github.com/CelerPi/HA_Virtual_Doorlock_System_App) | Addon 源码 |
+| [HA-Virtual-Doorlock-System-App](https://github.com/CelerPi/HA-Virtual-Doorlock-System-App) | Addon 源码 |
 
 ## License
 

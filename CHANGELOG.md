@@ -1,5 +1,10 @@
 # 更新日志
 
+## v0.4.9
+
+- 同步 Virtual Doorlock App 的新仓库名 `HA-Virtual-Doorlock-System-App`。
+- 更新 README 中的依赖仓库链接。
+
 ## v0.4.8
 
 - **优化手机端呼叫接听界面**
